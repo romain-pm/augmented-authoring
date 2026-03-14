@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    >
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jahia.modules</groupId>
+        <artifactId>jahia-modules</artifactId>
+        <version>8.2.1.0</version>
+    </parent>
+    <groupId>org.jahia.pm.modules</groupId>
+    <artifactId>augmented-authoring</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+    <name>augmented-authoring</name>
+    <description>Write a small description here.</description>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <jahia-module-type>system</jahia-module-type>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jahia-public</id>
+            <name>Jahia Public Repository</name>
+            <url>https://devtools.jahia.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/resources/javascript/apps</directory>
+                            <includes>
+                                <include>*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>yarn-install</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>yarn</executable>
+                            <arguments>
+                                <argument>install</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>yarn-build</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>yarn</executable>
+                            <arguments>
+                                <argument>build</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

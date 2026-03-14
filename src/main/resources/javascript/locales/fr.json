@@ -1,0 +1,4 @@
+{
+  "label": "Exemple d'administration",
+  "hello": "Bonjour {{name}} !"
+}

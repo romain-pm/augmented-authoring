@@ -1,0 +1,29 @@
+{
+  search(
+    q: "mysearch"
+    siteKeys: ["digitall"]
+    language: "en"
+    workspace: EDIT
+    functionScoreId: ""
+  ) {
+    results(size: 20, page: 0) {
+      totalHits
+      took
+      hits {
+        id
+        link
+        displayableName
+        excerpt
+        score
+        lastModified
+        lastModifiedBy
+        createdBy
+        created
+        nodeType
+        mimeType
+      }
+    }
+
+  }
+}
+

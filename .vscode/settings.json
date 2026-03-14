@@ -1,0 +1,8 @@
+{
+  "i18n-ally.localesPaths": ["src/main/resources/javascript/locales"],
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "chat.tools.terminal.autoApprove": {
+    "./deploy.sh": true
+  }
+}

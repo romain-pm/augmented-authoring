@@ -1,0 +1,18 @@
+node_modules
+target
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+._*
+.DS_Store
+
+# Build output in src
+src/main/resources/javascript/apps
+
+# Deployment script (contains credentials)
+deploy.sh
