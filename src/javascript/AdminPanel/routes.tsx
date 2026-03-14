@@ -1,5 +1,5 @@
 import { ApolloClient, ApolloProvider, useApolloClient } from "@apollo/client";
-import { DefaultEntry } from "@jahia/moonstone";
+import { DefaultEntry, PrimaryNavItem, Search } from "@jahia/moonstone";
 import { registry } from "@jahia/ui-extender";
 import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
@@ -8,6 +8,22 @@ import { createRoot } from "react-dom/client";
 import { AdminPanel } from "./AdminPanel.tsx";
 import { SearchModal } from "./SearchModal.tsx";
 import { setApolloClient } from "./apolloClientBridge.ts";
+
+// Captures jcontent's Apollo client as soon as the nav renders (app startup),
+// making it available to the modal without requiring an admin panel visit first.
+const NavSearchButton: React.FC = () => {
+  const client = useApolloClient();
+  useEffect(() => {
+    setApolloClient(client as ApolloClient<object>);
+  }, [client]);
+  return (
+    <PrimaryNavItem
+      icon={<Search />}
+      label="Search"
+      onClick={() => window.dispatchEvent(new CustomEvent("augmented-authoring:open-search"))}
+    />
+  );
+};
 
 // Rendered inside jcontent's ApolloProvider tree to capture its client
 // and make it available to separate React roots (e.g. the search modal).
@@ -32,6 +48,11 @@ export const registerRoutes = async () => {
       <SearchModal />
     </I18nextProvider>
   );
+
+  registry.add("primary-nav-item", "augmented-authoring-search", {
+    targets: ["nav-root-top:99"],
+    render: () => <NavSearchButton />,
+  });
 
   registry.add("adminRoute", "augmented-authoring", {
     targets: ["jcontent:10"],

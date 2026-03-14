@@ -3,6 +3,10 @@
   "java.configuration.updateBuildConfiguration": "interactive",
   "java.compile.nullAnalysis.mode": "automatic",
   "chat.tools.terminal.autoApprove": {
-    "./deploy.sh": true
+    "./deploy.sh": true,
+    "git rm": true,
+    "git add": true,
+    "git commit": true,
+    "git push": true
   }
 }

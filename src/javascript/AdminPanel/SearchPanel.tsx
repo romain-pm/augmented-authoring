@@ -3,6 +3,7 @@ import {
   Button,
   Input,
   Table,
+  DataTable,
   TableBody,
   TableBodyCell,
   TableHead,
@@ -102,7 +103,9 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
     const language = getLanguage();
     const siteBase = `/sites/${site}`;
 
-    let parentPath = nodePath.substring(0, nodePath.lastIndexOf("/"));
+    //let parentPath = nodePath.substring(0, nodePath.lastIndexOf("/"));
+    let parentPath = nodePath;
+
     if (!parentPath || !parentPath.startsWith(siteBase)) {
       parentPath = siteBase;
     }
@@ -203,14 +206,28 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
       {
         Header: t("search.col.title", "Title & excerpt"),
         accessor: "displayableName",
+        // Other fixed cols: 120 + 160 + 56 = 336 → set this to 336 for ~50/50 split
+        width: 336,
         Cell: ({ row }: { row: { original: SearchHit } }) => (
-          <div>
+          <div style={{ overflow: "hidden", maxHeight: "52px" }}>
             <div style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {row.original.displayableName}
             </div>
             {row.original.excerpt && (
               <div
-                style={{ fontSize: "11px", color: "#6b7280", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                style={{
+                  fontSize: "11px",
+                  color: "#374151",
+                  marginTop: "2px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  maxWidth: "100%",
+                  // Prevent any injected block elements from expanding the row
+                  display: "block",
+                  lineHeight: "1.4",
+                  maxHeight: "1.4em",
+                }}
                 dangerouslySetInnerHTML={{ __html: row.original.excerpt }}
               />
             )}
@@ -238,9 +255,12 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%" }}>
+      {/* Force Moonstone input height */}
+      <style>{`.augmented-search-input .moonstone-input { min-height: 36px !important; font-size: 16px !important; }`}</style>
       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-        <div style={{ flex: 1, fontSize: "1.5rem" }}>
+        <div style={{ flex: 1, fontSize: "1.5rem", minHeight: "36px" }} className="augmented-search-input">
           <Input
+            size="big"
             placeholder={t("search.placeholder", "Search…")}
             value={searchValue}
             icon={<Search />}
@@ -252,12 +272,6 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
             onClear={() => setSearchValue("")}
           />
         </div>
-        <Button
-          label={t("search.button", "Search")}
-          icon={<Search />}
-          isLoading={loading && allHits.length === 0}
-          onClick={() => triggerSearch(searchValue)}
-        />
       </div>
 
       {(allHits.length > 0 || totalHits > 0) && (
@@ -296,7 +310,14 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
                 onClick={() => { locateInJContent(row.original.path); onNavigate?.(); }}
               >
                 {row.cells.map((cell) => (
-                  <TableBodyCell {...cell.getCellProps()} style={{ verticalAlign: "middle" }}>
+                  <TableBodyCell
+                    {...cell.getCellProps()}
+                    style={{
+                      verticalAlign: "middle",
+                      overflow: "hidden",
+                      width: cell.column.width ? `${cell.column.width}px` : undefined,
+                    }}
+                  >
                     {cell.render("Cell")}
                   </TableBodyCell>
                 ))}

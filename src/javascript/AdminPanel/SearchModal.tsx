@@ -26,6 +26,8 @@ export const SearchModal = () => {
       }
     };
 
+    const handleOpenEvent = () => setIsOpen(true);
+
     const targets: Document[] = [document];
     try {
       if (window.parent && window.parent.document && window.parent !== window) {
@@ -36,7 +38,11 @@ export const SearchModal = () => {
     }
 
     targets.forEach((t) => t.addEventListener("keydown", handleKeyDown));
-    return () => targets.forEach((t) => t.removeEventListener("keydown", handleKeyDown));
+    window.addEventListener("augmented-authoring:open-search", handleOpenEvent);
+    return () => {
+      targets.forEach((t) => t.removeEventListener("keydown", handleKeyDown));
+      window.removeEventListener("augmented-authoring:open-search", handleOpenEvent);
+    };
   }, []);
 
   if (!isOpen) return null;
