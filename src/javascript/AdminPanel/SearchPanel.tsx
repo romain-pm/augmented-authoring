@@ -2,6 +2,8 @@ import { gql, useLazyQuery } from "@apollo/client";
 import { Button, DataTable, Edit, Input, Search, TableRow, Tooltip } from "@jahia/moonstone";
 import type { Row } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import i18next from "i18next";
+import { registry } from "@jahia/ui-extender";
 import { useTranslation } from "react-i18next";
 
 // NOTE: page size is hardcoded to 10 in the query below — keep in sync if changed.
@@ -98,6 +100,96 @@ type SearchContentProps = {
   focusOnField?: boolean;
   onNavigate?: () => void;
 };
+
+// ─── Feature / admin-route search ─────────────────────────────────────────────
+
+type FeatureHit = {
+  key: string;
+  label: string; // resolved display label (translated or humanized)
+};
+
+// Humanizes camelCase / kebab-case / snake_case strings for display.
+function humanize(s: string): string {
+  return s
+    .replace(/[-_]/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Tries to translate an i18n key of the form "namespace:key" using the shared
+// i18next singleton (which includes all loaded module namespaces at runtime).
+// Falls back to humanizing the key portion when the namespace is not loaded.
+function resolveLabel(rawLabel: string | undefined, fallbackKey: string): string {
+  if (!rawLabel) return humanize(fallbackKey);
+  const translated = i18next.t(rawLabel);
+  if (translated !== rawLabel) return translated;
+  // Not translated — humanize the part after the colon
+  const part = rawLabel.includes(":") ? rawLabel.split(":").pop() : rawLabel;
+  return humanize(part ?? fallbackKey);
+}
+
+// Returns adminRoute entries from the shared Jahia registry that match the
+// query string against both the key and the resolved display label.
+// @jahia/ui-extender is a shared singleton in the federation config, so
+// registry.find() reads from the same instance the host app uses.
+function searchFeatures(query: string): FeatureHit[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  return registry
+    .find({ type: "adminRoute" })
+    .map((e) => ({
+      key: e.key,
+      label: resolveLabel(e.label as string | undefined, e.key),
+    }))
+    .filter(({ key, label }) =>
+      key.toLowerCase().includes(q) || label.toLowerCase().includes(q)
+    );
+}
+
+// Finds the accordion item key that hosts a given admin route.
+// Admin routes targeting "jcontent:XX" or "jcontent-X:XX" all render inside
+// the "apps" accordion (appsTarget="jcontent"). Custom module accordions are
+// matched by looking for an accordionItem whose appsTarget equals the route's
+// direct target, or whose appsTarget is a prefix of it (nested sub-targets).
+function findAccordionMode(routeKey: string): string {
+  const route = registry.get("adminRoute", routeKey);
+  const targets = (route?.targets ?? []) as Array<{ id: string }>;
+  for (const target of targets) {
+    const tid = target.id;
+    const accordions = registry.find({ type: "accordionItem" });
+    for (const accordion of accordions) {
+      const appsTarget = accordion.appsTarget as string | undefined;
+      if (!appsTarget) continue;
+      if (appsTarget === tid || tid.startsWith(appsTarget + "-")) {
+        return accordion.key;
+      }
+    }
+  }
+  return "apps"; // default: jcontent's generic apps accordion
+}
+
+// Navigates the parent jContent SPA to a registered admin route by its key.
+// Primary path: dispatches the jcontentGoto Redux action (registered by
+// jcontent) so that routing, mode, and Redux state all stay consistent.
+// Fallback: pushes the URL directly and fires a synthetic popstate.
+function navigateToFeature(routeKey: string) {
+  const mode = findAccordionMode(routeKey);
+  // Try Redux dispatch first (the canonical jcontent navigation mechanism)
+  const jcGoto = registry.get("redux-action", "jcontentGoto");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const jahia = (window as any).jahia ?? (window.parent as any).jahia;
+  if (jcGoto?.action && jahia?.reduxStore) {
+    jahia.reduxStore.dispatch(jcGoto.action({ mode, path: "/" + routeKey }));
+    return;
+  }
+  // Fallback: construct the URL manually
+  const site = getSiteKey();
+  const language = getLanguage();
+  const newUrl = `/jahia/jcontent/${site}/${language}/${mode}/${routeKey}`;
+  const navKey = String(Date.now());
+  window.parent.history.pushState({ key: navKey }, "", newUrl);
+  window.parent.dispatchEvent(new PopStateEvent("popstate", { state: { key: navKey } }));
+}
 
 export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) => {
   const { t } = useTranslation();
@@ -205,6 +297,47 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue]);
 
+  // Client-side instant filter of matching admin routes — updates on every keystroke.
+  const featureHits = useMemo(() => searchFeatures(searchValue), [searchValue]);
+
+  // Feature table: label column + key column (monospace, secondary).
+  const featureColumns = useMemo(
+    () => [
+      {
+        key: "label" as const,
+        label: t("search.feature.col.name", "Feature"),
+        width: "65%",
+      },
+      {
+        key: "key" as const,
+        label: t("search.feature.col.key", "Module key"),
+        width: "35%",
+        render: (_value: unknown, row: FeatureHit) => (
+          <span style={{ fontSize: "12px"}}>
+            {row.key}
+          </span>
+        ),
+      },
+    ],
+    [t]
+  );
+
+  const renderFeatureRow = useCallback(
+    (row: Row<FeatureHit>, defaultRender: (opts?: { actions?: React.ReactNode; actionsOnHover?: React.ReactNode }) => React.ReactNode) => (
+      <TableRow
+        key={row.id}
+        style={{ cursor: "pointer" }}
+        onClick={() => { navigateToFeature(row.original.key); onNavigate?.(); }}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === "Enter") { navigateToFeature(row.original.key); onNavigate?.(); }
+        }}
+      >
+        {defaultRender()}
+      </TableRow>
+    ),
+    [onNavigate]
+  );
+
   // `key` values must be `as const` so TypeScript narrows them to the literal
   // type required by DataTableColumn — without it the type check on `columns`
   // fails because `string` is not assignable to `keyof SearchHit`.
@@ -257,7 +390,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
     [t]
   );  // Memoized so DataTable gets a stable renderRow reference — prevents rows
   // from re-rendering on every keystroke while results are already visible.
-  const renderRow = useCallback(
+  const renderContentRow = useCallback(
     (row: Row<SearchHit>, defaultRender: (opts?: { actions?: React.ReactNode; actionsOnHover?: React.ReactNode }) => React.ReactNode) => (
       <TableRow
         key={row.id}
@@ -295,6 +428,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
       <style>{`
         .augmented-search-input .moonstone-input { min-height: 36px !important; font-size: 16px !important; }
         .augmented-search-results thead { display: none; }
+        .augmented-search-results .moonstone-tableCell { height: 64px; }
         .augmented-search-results .moonstone-tableCellActions { align-self: stretch; display: flex; align-items: center; justify-content: flex-end; }
       `}</style>
       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -314,19 +448,41 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         </div>
       </div>
 
-      {(allHits.length > 0 || totalHits > 0) && (
-        <span style={{ fontSize: "12px", color: "#6b7280" }}>
-          {t("search.results", "{{count}} result(s)", { count: totalHits })}
-        </span>
-      )}
-
       <div ref={scrollContainerRef} style={{ overflowY: "auto", flex: 1, minWidth: 0 }}>
+        {/* Features section — instant client-side filter of registered adminRoutes */}
+        {searchValue.trim() && (
+          <div style={{ marginBottom: "24px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", padding: "0 4px 6px" }}>
+              {t("search.section.features", "Features")} · {featureHits.length}
+            </div>
+            {featureHits.length > 0 ? (
+              <DataTable<FeatureHit>
+                className="augmented-search-results"
+                data={featureHits}
+                primaryKey="key"
+                columns={featureColumns}
+                renderRow={renderFeatureRow}
+              />
+            ) : (
+              <div style={{ fontSize: "13px", color: "#9ca3af", padding: "8px 4px" }}>
+                {t("search.noFeatureResults", "No matching features")}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Content section — paginated GraphQL search */}
+        {(allHits.length > 0 || totalHits > 0) && (
+          <div style={{ fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", padding: "0 4px 6px" }}>
+            {t("search.section.content", "Content")} · {totalHits}
+          </div>
+        )}
         <DataTable<SearchHit>
           className="augmented-search-results"
           data={allHits}
           primaryKey="id"
           columns={columns}
-          renderRow={renderRow}
+          renderRow={renderContentRow}
         />
         {/* Sentinel triggers IntersectionObserver to load the next page */}
         <div ref={sentinelRef} style={{ height: "1px" }} />
