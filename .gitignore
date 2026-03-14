@@ -17,5 +17,5 @@ node/
 # Build output in src
 src/main/resources/javascript/apps
 
-# Deployment script (contains credentials)
-deploy.sh
+# Credentials — never commit
+.env
