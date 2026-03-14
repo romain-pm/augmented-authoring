@@ -1,6 +1,9 @@
 node_modules
 target
 
+# Local Node/Yarn binaries (not needed in repo)
+node/
+
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
