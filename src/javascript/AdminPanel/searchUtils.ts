@@ -1,0 +1,63 @@
+/**
+ * Utility functions for resolving Jahia context parameters and navigating
+ * the parent jContent SPA without a full page reload.
+ */
+
+export function getSiteKey(): string {
+  if (window.contextJsParameters.siteKey) {
+    return window.contextJsParameters.siteKey;
+  }
+  // Fallback: parse from URL pattern /administration/{siteKey}/settings/...
+  const parts = window.location.pathname.split("/");
+  const adminIndex = parts.indexOf("administration");
+  return adminIndex !== -1 && parts[adminIndex + 1]
+    ? parts[adminIndex + 1]
+    : "default";
+}
+
+export function getLanguage(): string {
+  return window.contextJsParameters.uilang ?? "en";
+}
+
+/**
+ * Navigates the parent jContent SPA to the given node path by pushing a new
+ * URL into its history and firing a synthetic popstate so React Router picks
+ * it up — without a full page reload.
+ */
+export function locateInJContent(nodePath: string): void {
+  const site = getSiteKey();
+  const language = getLanguage();
+  const siteBase = `/sites/${site}`;
+
+  let parentPath = nodePath;
+  if (!parentPath || !parentPath.startsWith(siteBase)) {
+    parentPath = siteBase;
+  }
+
+  let mode: string;
+  let urlPath: string;
+  if (parentPath.startsWith(`${siteBase}/files`)) {
+    mode = "media";
+    urlPath = parentPath.replace(siteBase, "");
+  } else if (parentPath.startsWith(`${siteBase}/contents`)) {
+    mode = "content-folders";
+    urlPath = parentPath.replace(siteBase, "");
+  } else {
+    mode = "pages";
+    urlPath = parentPath.replace(siteBase, "") || "/";
+  }
+
+  const encodedPath = urlPath
+    .split("/")
+    .map((s) => (s ? encodeURIComponent(s) : ""))
+    .join("/");
+
+  const newUrl = `/jahia/jcontent/${site}/${language}/${mode}${encodedPath}`;
+  const navKey = String(Date.now());
+  // Push and fire a synthetic popstate so React Router re-renders without a
+  // full page reload.
+  window.parent.history.pushState({ key: navKey }, "", newUrl);
+  window.parent.dispatchEvent(
+    new PopStateEvent("popstate", { state: { key: navKey } }),
+  );
+}

@@ -57,6 +57,7 @@ export const SearchModal = () => {
       style={{
         position: "fixed",
         inset: 0,
+        /* Semi-transparent backdrop dims the page without fully hiding it */
         backgroundColor: "rgba(0, 0, 0, 0.5)",
         zIndex: 1000,
         display: "flex",
@@ -68,6 +69,7 @@ export const SearchModal = () => {
     >
       <div
         style={{
+          /* Frosted-glass effect: slightly translucent white with blur */
           background: "rgba(255, 255, 255, 0.76)",
           backdropFilter: "blur(8px)",
           borderRadius: "8px",
@@ -77,24 +79,25 @@ export const SearchModal = () => {
           height: "82vh",
           overflow: "hidden",
           boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
-          color: "#1f2937",
+          color: "var(--color-dark)",
           fontSize: "15px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div style={{ marginBottom: "16px" }}>
-            <div style={{ fontWeight: 700, fontSize: "20px", color: "#111827" }}>
+            <div style={{ fontWeight: 700, fontSize: "20px", color: "var(--color-dark)" }}>
               {t("search.modal.title", "Search")}
             </div>
-            <div style={{ fontSize: "12px", color: "#131C21", marginTop: "2px" }}>
+            <div style={{ fontSize: "12px", color: "var(--color-gray)", marginTop: "2px" }}>
               {t("search.modal.hint", "Press Ctrl+K or ⌘K to open me. Esc to close. Navigate with arrows or tabs. Enter to go to. e for edit. ")}
             </div>
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <SearchContent focusOnField onNavigate={() => setIsOpen(false)} />
           </div>
-          <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "#6b7280", display: "flex", justifyContent: "flex-end" }}>
+          {/* Build timestamp — useful to confirm which version is deployed */}
+          <div style={{ borderTop: "1px solid var(--color-gray_light20)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "var(--color-gray)", display: "flex", justifyContent: "flex-end" }}>
           <strong style={{ color: "#16a34a", fontSize: "15px" }}> Built&nbsp; - {__BUILD_TIME__}</strong>
           </div>
         </div>

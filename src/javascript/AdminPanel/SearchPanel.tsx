@@ -1,103 +1,23 @@
-import { gql, useLazyQuery } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client";
 import { Button, DataTable, Edit, Input, Search, TableRow, Tooltip } from "@jahia/moonstone";
 import type { Row } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SEARCH_QUERY, type SearchHit } from "./searchQuery.ts";
+import { getSiteKey, getLanguage, locateInJContent } from "./searchUtils.ts";
+import { SearchSkeleton } from "./SearchSkeleton.tsx";
 
-// NOTE: page size is hardcoded to 10 in the query below — keep in sync if changed.
-const SEARCH_QUERY = gql`
-  query Search($q: String!, $siteKeys: [String]!, $language: String!, $page: Int!) {
-    search(
-      q: $q
-      siteKeys: $siteKeys
-      language: $language
-      workspace: EDIT
-    ) {
-      results(size: 10, page: $page) {
-        totalHits
-        hits {
-          id
-          path
-          displayableName
-          excerpt
-          lastModified
-          lastModifiedBy
-          nodeType
-        }
-      }
-    }
-  }
-`;
-
-type SearchHit = {
-  id: string;
-  path: string;
-  displayableName: string;
-  excerpt: string;
-  lastModified: string;
-  lastModifiedBy: string;
-  nodeType: string;
-};
-
-function getSiteKey(): string {
-  if (window.contextJsParameters.siteKey) {
-    return window.contextJsParameters.siteKey;
-  }
-  // Fallback: parse from URL pattern /administration/{siteKey}/settings/...
-  const parts = window.location.pathname.split("/");
-  const adminIndex = parts.indexOf("administration");
-  return adminIndex !== -1 && parts[adminIndex + 1] ? parts[adminIndex + 1] : "default";
-}
-
-function getLanguage(): string {
-  return window.contextJsParameters.uilang ?? "en";
-}
-
-// Navigates the parent jContent SPA to the given node path by pushing a new
-// URL into its history and firing a synthetic popstate so React Router picks
-// it up — without a full page reload.
-// Defined outside the component because it only uses module-level helpers,
-// making it a stable reference for useCallback deps below.
-function locateInJContent(nodePath: string) {
-  const site = getSiteKey();
-  const language = getLanguage();
-  const siteBase = `/sites/${site}`;
-
-  let parentPath = nodePath;
-  if (!parentPath || !parentPath.startsWith(siteBase)) {
-    parentPath = siteBase;
-  }
-
-  let mode: string;
-  let urlPath: string;
-  if (parentPath.startsWith(`${siteBase}/files`)) {
-    mode = "media";
-    urlPath = parentPath.replace(siteBase, "");
-  } else if (parentPath.startsWith(`${siteBase}/contents`)) {
-    mode = "content-folders";
-    urlPath = parentPath.replace(siteBase, "");
-  } else {
-    mode = "pages";
-    urlPath = parentPath.replace(siteBase, "") || "/";
-  }
-
-  const encodedPath = urlPath
-    .split("/")
-    .map((s) => (s ? encodeURIComponent(s) : ""))
-    .join("/");
-
-  const newUrl = `/jahia/jcontent/${site}/${language}/${mode}${encodedPath}`;
-  const navKey = String(Date.now());
-  // Push and fire a synthetic popstate so React Router re-renders without a
-  // full page reload.
-  window.parent.history.pushState({ key: navKey }, "", newUrl);
-  window.parent.dispatchEvent(new PopStateEvent("popstate", { state: { key: navKey } }));
-}
 
 type SearchContentProps = {
   focusOnField?: boolean;
   onNavigate?: () => void;
 };
+
+// Shared styles for the empty-state and no-results centered panels.
+// Defined outside the component so they are stable object references.
+const stateContainer: React.CSSProperties = { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "80%", gap: "16px", userSelect: "none" };
+const stateHeading: React.CSSProperties = { fontSize: "26px", fontWeight: 800, color: "var(--color-dark)", letterSpacing: "-0.5px" };
+const stateBody: React.CSSProperties = { fontSize: "14px", color: "var(--color-gray)", textAlign: "center", maxWidth: "300px", lineHeight: 1.6 };
 
 export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) => {
   const { t } = useTranslation();
@@ -225,14 +145,14 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         width: "64%",
         render: (_value: unknown, row: SearchHit) => (
           <div style={{ minWidth: 0, width: "100%", padding: "8px 0" }}>
-            <div style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {row.displayableName}
             </div>
             {row.excerpt && (
               <div
                 style={{
                   fontSize: "12px",
-                  color: "#374151",
+                  color: "var(--color-gray_dark)",
                   marginTop: "3px",
                   overflow: "hidden",
                   whiteSpace: "normal",
@@ -255,7 +175,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         render: (_value: unknown, row: SearchHit) => (
           <div style={{ fontSize: "12px" }}>
             <div>by {row.lastModifiedBy}</div>
-            <div style={{ color: "#6b7280", marginTop: "2px" }}>on {row.lastModified}</div>
+            <div style={{ color: "var(--color-gray)", marginTop: "2px" }}>on {row.lastModified}</div>
           </div>
         ),
       },
@@ -306,18 +226,41 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
     [t, onNavigate]
   );
 
+  // Compute once per render; used across empty state, skeleton, no-results, and no-results text
+  const trimmedQuery = searchValue.trim();
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px", height: "100%" }}>
       {/* Force Moonstone input height; sticky table header within the scroll container */}
       <style>{`
+        /* Force Moonstone input to be taller and more readable */
         .augmented-search-input .moonstone-input { min-height: 36px !important; font-size: 16px !important; }
+
+        /* Hide the auto-generated table header — we don't need column labels in the search UI */
         .augmented-search-results thead { display: none; }
+
+        /* Allow the title/excerpt cell to overflow vertically so 2-line clamp works.
+           Moonstone's moonstone-nowrap class otherwise collapses the cell to 1 line. */
         .augmented-search-results .moonstone-tableCell:first-child { overflow: visible !important; }
+
+        /* Ensure the hover-actions cell stretches to full row height and right-aligns */
         .augmented-search-results .moonstone-tableCellActions { align-self: stretch; display: flex; align-items: center; justify-content: flex-end; }
-        .augmented-search-results .moonstone-tableRow:focus { outline: none; border-radius: 6px; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-accent); }
+
+        /* Keyboard focus ring: white gap + accent outline, rounded to match row shape */
+        .augmented-search-results .moonstone-tableRow:focus,
+        .augmented-search-results .moonstone-tableRow:hover { outline: none; border-radius: 6px; box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-accent); }
+
+        /* Highlight matched terms (Jahia wraps them in <em> inside excerpt HTML) */
         .augmented-search-results em { font-weight: 700; font-style: italic; color: var(--color-accent); }
+
+        /* Skeleton shimmer animation for the loading state */
         @keyframes shimmer { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
-        .augmented-skeleton { background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 600px 100%; animation: shimmer 1.2s infinite linear; border-radius: 4px; }
+        .augmented-skeleton {
+          background: linear-gradient(90deg, var(--color-gray_light_plain20) 25%, var(--color-gray_plain20) 50%, var(--color-gray_light_plain20) 75%);
+          background-size: 600px 100%;
+          animation: shimmer 1.2s infinite linear;
+          border-radius: 4px;
+        }
       `}</style>
       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         <div ref={inputWrapperRef} style={{ flex: 1, fontSize: "1.5rem", minHeight: "36px" }} className="augmented-search-input">
@@ -344,57 +287,30 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
       </div>
 
       {(allHits.length > 0 || totalHits > 0) && (
-        <span style={{ fontSize: "12px", color: "#6b7280" }}>
+        <span style={{ fontSize: "12px", color: "var(--color-gray)" }}>
           {t("search.results", "{{count}} result(s)", { count: totalHits })}
         </span>
       )}
 
       <div ref={scrollContainerRef} style={{ overflowY: "auto", flex: 1, minWidth: 0, padding: "4px 4px 0" }}>
-        {/* ── Empty state ── */}
-        {searchValue.trim().length < 3 && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "80%", gap: "16px", userSelect: "none" }}>
+        {/* ── Empty state (shown until user types 3+ chars) ── */}
+        {trimmedQuery.length < 3 && (
+          <div style={stateContainer}>
             <div style={{ fontSize: "72px", lineHeight: 1 }}>🔍</div>
-            <div style={{ fontSize: "26px", fontWeight: 800, color: "#111827", letterSpacing: "-0.5px" }}>
-              {t("search.empty.title", "Find anything.")}
-            </div>
-            <div style={{ fontSize: "14px", color: "#131C21", textAlign: "center", maxWidth: "300px", lineHeight: 1.6 }}>
-              {t("search.empty.hint", "Pages, content, documents, ... Just start typing (3 chars min).")}
-            </div>
-     
+            <div style={stateHeading}>{t("search.empty.title", "Find anything.")}</div>
+            <div style={stateBody}>{t("search.empty.hint", "Pages, content, documents, ... Just start typing (3 chars min).")}</div>
           </div>
         )}
 
-        {/* ── Skeleton loader (initial fetch) ── */}
-        {loading && allHits.length === 0 && (
-          <div>
-            {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", height: "76px", padding: "0 12px", gap: "12px", borderBottom: "1px solid #f3f4f6" }}>
-                <div style={{ flex: "0 0 32px" }}>
-                  <div className="augmented-skeleton" style={{ width: "32px", height: "32px", borderRadius: "6px" }} />
-                </div>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <div className="augmented-skeleton" style={{ width: `${60 + (i * 13) % 30}%`, height: "14px" }} />
-                  <div className="augmented-skeleton" style={{ width: `${40 + (i * 17) % 40}%`, height: "11px" }} />
-                </div>
-                <div style={{ flex: "0 0 80px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <div className="augmented-skeleton" style={{ width: "60px", height: "11px" }} />
-                  <div className="augmented-skeleton" style={{ width: "48px", height: "11px" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* ── Skeleton loader (shown while first page is fetching) ── */}
+        {loading && allHits.length === 0 && trimmedQuery.length >= 3 && <SearchSkeleton />}
 
-        {/* ── No results ── */}
-        {searchValue.trim().length >= 3 && !loading && allHits.length === 0 && currentQueryRef.current === searchValue.trim() && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "80%", gap: "16px", userSelect: "none" }}>
+        {/* ── No results (only shown once the query has actually completed) ── */}
+        {trimmedQuery.length >= 3 && !loading && allHits.length === 0 && currentQueryRef.current === trimmedQuery && (
+          <div style={stateContainer}>
             <div style={{ fontSize: "72px", lineHeight: 1 }}>🕵️</div>
-            <div style={{ fontSize: "26px", fontWeight: 800, color: "#111827", letterSpacing: "-0.5px" }}>
-              {t("search.noResults.title", "No results.")}
-            </div>
-            <div style={{ fontSize: "14px", color: "#9ca3af", textAlign: "center", maxWidth: "300px", lineHeight: 1.6 }}>
-              {t("search.noResults.hint", 'Nothing matched "{{q}}". Try different keywords or check for typos.', { q: searchValue.trim() })}
-            </div>
+            <div style={stateHeading}>{t("search.noResults.title", "No results.")}</div>
+            <div style={stateBody}>{t("search.noResults.hint", 'Nothing matched "{{q}}". Try different keywords or check for typos.', { q: trimmedQuery })}</div>
           </div>
         )}
         <DataTable<SearchHit>
@@ -407,7 +323,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         {/* Sentinel triggers IntersectionObserver to load the next page */}
         <div ref={sentinelRef} style={{ height: "1px" }} />
         {loading && allHits.length > 0 && (
-          <div style={{ textAlign: "center", padding: "8px", fontSize: "12px", color: "#6b7280" }}>
+          <div style={{ textAlign: "center", padding: "8px", fontSize: "12px", color: "var(--color-gray)" }}>
             {t("search.loadingMore", "Loading more…")}
           </div>
         )}
