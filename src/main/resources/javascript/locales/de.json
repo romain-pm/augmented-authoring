@@ -20,11 +20,12 @@
     },
     "empty": {
       "title": "Alles finden.",
-      "hint": "Seiten, Inhalte, Dokumente … Einfach tippen (mind. 3 Zeichen)."
+      "hint": "Seiten, Inhalte, Dokumente … Einfach tippen (mind. 3 Zeichen).",
+      "hint2": "Versuchen Sie andere Begriffe oder prüfen Sie die Schreibweise."
     },
     "noResults": {
       "title": "Keine Ergebnisse.",
-      "hint": "Keine Treffer für „{{q}}". Versuchen Sie andere Begriffe oder prüfen Sie die Schreibweise."
+      "hint": "Keine Treffer für \"{{q}}\". Versuchen Sie andere Begriffe oder prüfen Sie die Schreibweise."
     }
   }
 }

@@ -141,13 +141,21 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
     () => [
       {
         key: "displayableName" as const,
-        label: t("search.col.title", "Title & excerpt"),
-        width: "64%",
+        label: "",
+        width: "calc(100% - 48px)",
         render: (_value: unknown, row: SearchHit) => (
-          <div style={{ minWidth: 0, width: "100%", padding: "8px 0" }}>
+          <div style={{ minWidth: 0, width: "100%", padding: "6px 0" }}>
+            {/* Row 1: displayable name */}
             <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {row.displayableName}
+              {row.displayableName.length > 80 ? row.displayableName.slice(0, 80) + "…" : row.displayableName}
             </div>
+            {/* Row 2: type · path */}
+            <div style={{ fontSize: "11px", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <span style={{ fontWeight: 500 }}>{row.nodeType}</span>
+              <span style={{ margin: "0 5px", opacity: 0.4 }}>·</span>
+              <span style={{ opacity: 0.7 }}>{row.path}</span>
+            </div>
+            {/* Row 3: excerpt */}
             {row.excerpt && (
               <div
                 style={{
@@ -167,18 +175,6 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
           </div>
         ),
       },
-      { key: "nodeType" as const, label: t("search.col.type", "Type"), width: "16%" },
-      {
-        key: "lastModified" as const,
-        label: t("search.col.lastModified", "Last modified"),
-        width: "12%",
-        render: (_value: unknown, row: SearchHit) => (
-          <div style={{ fontSize: "12px" }}>
-            <div>by {row.lastModifiedBy}</div>
-            <div style={{ color: "var(--color-gray)", marginTop: "2px" }}>on {row.lastModified}</div>
-          </div>
-        ),
-      },
     ],
     [t]
   );  // Memoized so DataTable gets a stable renderRow reference — prevents rows
@@ -187,7 +183,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
     (row: Row<SearchHit>, defaultRender: (opts?: { actions?: React.ReactNode; actionsOnHover?: React.ReactNode }) => React.ReactNode) => (
       <TableRow
         key={row.id}
-        style={{ height: "76px", cursor: "pointer" }}
+        style={{ height: "96px", cursor: "pointer" }}
         onClick={() => { locateInJContent(row.original.path); onNavigate?.(); }}
         onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === "Enter") { locateInJContent(row.original.path); onNavigate?.(); return; }
@@ -205,7 +201,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         }}
       >
         {defaultRender({
-          actionsOnHover: (
+          actions: (
             <Tooltip label={t("search.action.edit", "Edit")}>
               <Button
                 size="big"
@@ -298,7 +294,8 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
           <div style={stateContainer}>
             <div style={{ fontSize: "72px", lineHeight: 1 }}>🔍</div>
             <div style={stateHeading}>{t("search.empty.title", "Find anything.")}</div>
-            <div style={stateBody}>{t("search.empty.hint", "Pages, content, documents, ... Just start typing (3 chars min).")}</div>
+            <div style={stateBody}>{t("search.empty.hint", "Pages, content, documents, ...")}</div>
+            <div style={stateBody}>{t("search.empty.hint2", "Just start typing (3 chars min).")}</div>
           </div>
         )}
 

@@ -62,8 +62,7 @@ export const SearchModal = () => {
         zIndex: 1000,
         display: "flex",
         alignItems: "flex-start",
-        justifyContent: "center",
-        paddingTop: "10vh",
+        justifyContent: "center"
       }}
       onClick={() => setIsOpen(false)}
     >
@@ -73,10 +72,10 @@ export const SearchModal = () => {
           background: "rgba(255, 255, 255, 0.76)",
           backdropFilter: "blur(8px)",
           borderRadius: "8px",
-          padding: "24px",
+          padding: "24px 28px",
           width: "60vw",
           maxWidth: "60vw",
-          height: "82vh",
+          height: "88vh",
           overflow: "hidden",
           boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
           color: "var(--color-dark)",
@@ -89,16 +88,18 @@ export const SearchModal = () => {
             <div style={{ fontWeight: 700, fontSize: "20px", color: "var(--color-dark)" }}>
               {t("search.modal.title", "Search")}
             </div>
-            <div style={{ fontSize: "12px", color: "var(--color-gray)", marginTop: "2px" }}>
-              {t("search.modal.hint", "Press Ctrl+K or ⌘K to open me. Esc to close. Navigate with arrows or tabs. Enter to go to. e for edit. ")}
-            </div>
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <SearchContent focusOnField onNavigate={() => setIsOpen(false)} />
           </div>
-          {/* Build timestamp — useful to confirm which version is deployed */}
-          <div style={{ borderTop: "1px solid var(--color-gray_light20)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "var(--color-gray)", display: "flex", justifyContent: "flex-end" }}>
-          <strong style={{ color: "#16a34a", fontSize: "15px" }}> Built&nbsp; - {__BUILD_TIME__}</strong>
+          {/* Footer */}
+          <div style={{ borderTop: "1px solid var(--color-gray_light20)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "var(--color-dark)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+            <div style={{ flex: "0 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {t("search.modal.hint", "Press Ctrl+K or ⌘K to open · Esc to close · ↑↓ navigate · Enter to go · E to edit")}
+            </div>
+            <div style={{ flex: "0 0 auto" }}>
+              <strong style={{ color: "#16a34a", fontSize: "15px" }}>Built — {__BUILD_TIME__}</strong>
+            </div>
           </div>
         </div>
       </div>

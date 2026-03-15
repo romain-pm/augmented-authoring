@@ -20,7 +20,8 @@
     },
     "empty": {
       "title": "Find anything.",
-      "hint": "Pages, content, documents, ... Just start typing (3 chars min)."
+      "hint": "Pages, content, documents, ...",
+      "hint2": "Just start typing (3 chars min)."
     },
     "noResults": {
       "title": "No results.",
