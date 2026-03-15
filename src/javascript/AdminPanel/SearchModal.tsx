@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ApolloProvider } from "@apollo/client";
 import { SearchContent } from "./SearchPanel.tsx";
 import { getApolloClient, onApolloClientReady } from "./apolloClientBridge.ts";
+import { getSiteKey } from "./searchUtils.ts";
 
 export const SearchModal = () => {
   const { t } = useTranslation();
@@ -86,20 +87,15 @@ export const SearchModal = () => {
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div style={{ marginBottom: "16px" }}>
             <div style={{ fontWeight: 700, fontSize: "20px", color: "var(--color-dark)" }}>
-              {t("search.modal.title", "Search")}
+              {t("search.modal.title", "Search in {{site}}", { site: getSiteKey() })}
             </div>
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <SearchContent focusOnField onNavigate={() => setIsOpen(false)} />
           </div>
           {/* Footer */}
-          <div style={{ borderTop: "1px solid var(--color-gray)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "var(--color-dark)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
-            <div style={{ flex: "0 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {t("search.modal.hint", "Press Ctrl+K or ⌘K to open · Esc to close · ↑↓ navigate · Enter to go · E to edit")}
-            </div>
-            <div style={{ flex: "0 0 auto" }}>
-              <strong style={{ color: "#16a34a", fontSize: "15px" }}>Built - {__BUILD_TIME__}</strong>
-            </div>
+          <div style={{ borderTop: "1px solid var(--color-gray)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "var(--color-dark)" }}>
+            {t("search.modal.hint", "Press Ctrl+K or ⌘K to open · Esc to close · ↑↓ navigate · Enter to go · E to edit")}
           </div>
         </div>
       </div>

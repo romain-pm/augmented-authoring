@@ -3,7 +3,7 @@ import { Button, DataTable, Edit, Input, Search, TableRow, Tooltip } from "@jahi
 import type { Row } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SEARCH_QUERY, type SearchHit } from "./searchQuery.ts";
+import { SEARCH_QUERY, SITE_INDEX_QUERY, type SearchHit } from "./searchQuery.ts";
 import { getSiteKey, getSearchLanguage, locateInJContent } from "./searchUtils.ts";
 import { SearchSkeleton } from "./SearchSkeleton.tsx";
 
@@ -12,6 +12,10 @@ type SearchContentProps = {
   focusOnField?: boolean;
   onNavigate?: () => void;
 };
+
+// Module-level cache: site key → whether it has jmix:augmentedSearchIndexableSite.
+// Populated once per site per page load — never re-queried.
+const siteIndexCache = new Map<string, boolean>();
 
 // Shared styles for the empty-state and no-results centered panels.
 // Defined outside the component so they are stable object references.
@@ -25,6 +29,11 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
   const [allHits, setAllHits] = useState<SearchHit[]>([]);
   const [totalHits, setTotalHits] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  // null = not yet checked, true/false = result known
+  const [isSiteIndexed, setIsSiteIndexed] = useState<boolean | null>(() => {
+    const cached = siteIndexCache.get(getSiteKey());
+    return cached !== undefined ? cached : null;
+  });
   // A ref (not state) so the IntersectionObserver can always read the latest
   // query string without needing to be re-created, and without triggering an
   // extra re-render when a new search starts.
@@ -59,6 +68,25 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
       });
     },
   });
+
+  const [checkSiteIndex] = useLazyQuery<{
+    jcr: { nodeByPath: { isNodeType: boolean } };
+  }>(SITE_INDEX_QUERY, {
+    fetchPolicy: "cache-first",
+    onCompleted: (result) => {
+      const indexed = result?.jcr?.nodeByPath?.isNodeType ?? false;
+      siteIndexCache.set(getSiteKey(), indexed);
+      setIsSiteIndexed(indexed);
+    },
+  });
+
+  // Check site indexing status once on mount (skip if already cached)
+  useEffect(() => {
+    if (isSiteIndexed === null) {
+      void checkSiteIndex({ variables: { path: `/sites/${getSiteKey()}` } });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const triggerSearch = (value: string) => {
     const trimmed = value.trim();
@@ -245,9 +273,10 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         /* Remove Moonstone's light gray row border-bottom */
         .augmented-search-results .moonstone-tableRow { border-bottom: 1px solid var(--color-gray) !important; margin-right: 8px; padding: 0 var(--spacing-small); }
 
-        /* Keyboard focus ring: white gap + accent outline, rounded to match row shape */
-        .augmented-search-results .moonstone-tableRow:focus,
-        .augmented-search-results .moonstone-tableRow:hover { outline: none; border-radius: 6px; box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-accent); }
+        /* Keyboard focus ring */
+        .augmented-search-results .moonstone-tableRow:focus { outline: none; border-radius: 6px; box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-accent); }
+        /* Mouse hover: subtle background darkening, no outline */
+        .augmented-search-results .moonstone-tableRow:hover:not(:focus) { outline: none; background-color: rgba(0, 0, 0, 0.04); }
 
         /* Highlight matched terms (Jahia wraps them in <em> inside excerpt HTML) */
         .augmented-search-results em { font-weight: 700; font-style: italic; color: var(--color-accent); }
@@ -265,11 +294,11 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         <div ref={inputWrapperRef} style={{ flex: 1, fontSize: "1.5rem", minHeight: "36px" }} className="augmented-search-input">
           <Input
             size="big"
-            placeholder={t("search.placeholder", "Search in {{site}}…", { site: getSiteKey() })}
+            placeholder={t("search.placeholder", "Search…")}
             value={searchValue}
             icon={<Search />}
-            focusOnField={focusOnField}
-            onChange={(e) => setSearchValue(e.target.value)}
+            focusOnField={focusOnField && isSiteIndexed !== false}
+            onChange={(e) => isSiteIndexed !== false && setSearchValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
                 e.preventDefault();
@@ -292,8 +321,17 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
       )}
 
       <div ref={scrollContainerRef} style={{ overflowY: "auto", flex: 1, minWidth: 0, padding: "4px 8px 0" }}>
+        {/* ── Site not indexed ── */}
+        {isSiteIndexed === false && (
+          <div style={stateContainer}>
+            <div style={{ fontSize: "72px", lineHeight: 1 }}>🚫</div>
+            <div style={stateHeading}>{t("search.notIndexed.title", "Search unavailable.")}</div>
+            <div style={stateBody}>{t("search.notIndexed.hint", "This site is not indexed for augmented search. Ask an administrator to enable it.")}</div>
+          </div>
+        )}
+
         {/* ── Empty state (shown until user types 3+ chars) ── */}
-        {trimmedQuery.length < 3 && (
+        {isSiteIndexed !== false && trimmedQuery.length < 3 && (
           <div style={stateContainer}>
             <div style={{ fontSize: "72px", lineHeight: 1 }}>🔍</div>
             <div style={stateHeading}>{t("search.empty.title", "Find anything.")}</div>
@@ -303,10 +341,10 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         )}
 
         {/* ── Skeleton loader (shown while first page is fetching) ── */}
-        {loading && allHits.length === 0 && trimmedQuery.length >= 3 && <SearchSkeleton />}
+        {isSiteIndexed !== false && loading && allHits.length === 0 && trimmedQuery.length >= 3 && <SearchSkeleton />}
 
         {/* ── No results (only shown once the query has actually completed) ── */}
-        {trimmedQuery.length >= 3 && !loading && allHits.length === 0 && currentQueryRef.current === trimmedQuery && (
+        {isSiteIndexed !== false && trimmedQuery.length >= 3 && !loading && allHits.length === 0 && currentQueryRef.current === trimmedQuery && (
           <div style={stateContainer}>
             <div style={{ fontSize: "72px", lineHeight: 1 }}>🕵️</div>
             <div style={stateHeading}>{t("search.noResults.title", "No results.")}</div>

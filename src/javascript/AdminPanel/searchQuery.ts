@@ -25,6 +25,19 @@ export const SEARCH_QUERY = gql`
   }
 `;
 
+// Checks whether the site node carries the mixin that enables augmented-search indexing.
+export const SITE_INDEX_QUERY = gql`
+  query CheckSiteIndexed($path: String!) {
+    jcr {
+      nodeByPath(path: $path) {
+        isNodeType(
+          type: { multi: ANY, types: ["jmix:augmentedSearchIndexableSite"] }
+        )
+      }
+    }
+  }
+`;
+
 export type SearchHit = {
   id: string;
   path: string;

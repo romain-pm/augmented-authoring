@@ -2,7 +2,7 @@
   "label": "Exemple d'administration",
   "hello": "Bonjour {{name}} !",
   "search": {
-    "placeholder": "Rechercher dans {{site}}…",
+    "placeholder": "Rechercher…",
     "results": "{{count}} résultat(s)",
     "loadingMore": "Chargement…",
     "col": {
@@ -15,7 +15,7 @@
     },
     "modal": {
       "label": "Recherche",
-      "title": "Recherche",
+      "title": "Rechercher dans {{site}}",
       "hint": "Appuyez sur Ctrl+K ou ⌘K pour ouvrir. Échap pour fermer. Naviguez avec les flèches ou la touche Tab. Entrée pour accéder. e pour modifier."
     },
     "empty": {
@@ -25,6 +25,10 @@
     "noResults": {
       "title": "Aucun résultat.",
       "hint": "Aucun résultat pour « {{q}} ». Essayez d'autres mots-clés ou vérifiez l'orthographe."
+    },
+    "notIndexed": {
+      "title": "Recherche indisponible.",
+      "hint": "Ce site n'est pas indexé pour la recherche augmentée. Demandez à un administrateur de l'activer."
     }
   }
 }

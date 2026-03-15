@@ -2,7 +2,7 @@
   "label": "Erweitertes Authoring",
   "hello": "Hallo {{name}}!",
   "search": {
-    "placeholder": "In {{site}} suchen…",
+    "placeholder": "Suchen…",
     "results": "{{count}} Ergebnis(se)",
     "loadingMore": "Mehr laden…",
     "col": {
@@ -15,7 +15,7 @@
     },
     "modal": {
       "label": "Suche",
-      "title": "Suche",
+      "title": "In {{site}} suchen",
       "hint": "Strg+K oder ⌘K zum Öffnen. Esc zum Schließen. Mit Pfeiltasten oder Tab navigieren. Enter zum Aufrufen. e zum Bearbeiten."
     },
     "empty": {
@@ -26,6 +26,10 @@
     "noResults": {
       "title": "Keine Ergebnisse.",
       "hint": "Keine Treffer für \"{{q}}\". Versuchen Sie andere Begriffe oder prüfen Sie die Schreibweise."
+    },
+    "notIndexed": {
+      "title": "Suche nicht verfügbar.",
+      "hint": "Diese Website ist nicht für die erweiterte Suche indiziert. Bitten Sie einen Administrator, dies zu aktivieren."
     }
   }
 }

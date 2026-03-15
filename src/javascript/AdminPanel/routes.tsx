@@ -55,6 +55,7 @@ export const registerRoutes = async () => {
 
   registry.add("primary-nav-item", "augmented-authoring-search", {
     targets: ["nav-root-top:99"],
+    requireModuleInstalledOnSite: 'augmented-authoring',
     render: () => <NavSearchButton />,
   });
 

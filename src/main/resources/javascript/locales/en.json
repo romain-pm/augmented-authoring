@@ -2,7 +2,7 @@
   "label": "Augmented authoring",
   "hello": "Hello {{name}}!",
   "search": {
-    "placeholder": "Search in {{site}}…",
+    "placeholder": "Search…",
     "results": "{{count}} result(s)",
     "loadingMore": "Loading more…",
     "col": {
@@ -15,7 +15,7 @@
     },
     "modal": {
       "label": "Search",
-      "title": "Search",
+      "title": "Search in {{site}}",
       "hint": "Press Ctrl+K or ⌘K to open me. Esc to close. Navigate with arrows or tabs. Enter to go to. e for edit."
     },
     "empty": {
@@ -26,6 +26,10 @@
     "noResults": {
       "title": "No results.",
       "hint": "Nothing matched \"{{q}}\". Try different keywords or check for typos."
+    },
+    "notIndexed": {
+      "title": "Search unavailable.",
+      "hint": "This site is not indexed for augmented search. Ask an administrator to enable it."
     }
   }
 }

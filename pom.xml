@@ -18,7 +18,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <jahia-module-type>system</jahia-module-type>
+        <!--<jahia-module-type>system</jahia-module-type>-->
         <jahia-depends>augmented-search</jahia-depends>
     </properties>
 
