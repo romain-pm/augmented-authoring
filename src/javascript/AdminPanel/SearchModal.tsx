@@ -61,7 +61,7 @@ export const SearchModal = () => {
         backgroundColor: "rgba(0, 0, 0, 0.5)",
         zIndex: 1000,
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "center"
       }}
       onClick={() => setIsOpen(false)}
@@ -74,7 +74,7 @@ export const SearchModal = () => {
           borderRadius: "8px",
           padding: "24px 28px",
           width: "60vw",
-          maxWidth: "60vw",
+          maxWidth: "800px",
           height: "88vh",
           overflow: "hidden",
           boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
@@ -93,12 +93,12 @@ export const SearchModal = () => {
             <SearchContent focusOnField onNavigate={() => setIsOpen(false)} />
           </div>
           {/* Footer */}
-          <div style={{ borderTop: "1px solid var(--color-gray_light20)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "var(--color-dark)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+          <div style={{ borderTop: "1px solid var(--color-gray)", marginTop: "12px", paddingTop: "8px", fontSize: "13px", color: "var(--color-dark)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
             <div style={{ flex: "0 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {t("search.modal.hint", "Press Ctrl+K or ⌘K to open · Esc to close · ↑↓ navigate · Enter to go · E to edit")}
             </div>
             <div style={{ flex: "0 0 auto" }}>
-              <strong style={{ color: "#16a34a", fontSize: "15px" }}>Built — {__BUILD_TIME__}</strong>
+              <strong style={{ color: "#16a34a", fontSize: "15px" }}>Built - {__BUILD_TIME__}</strong>
             </div>
           </div>
         </div>

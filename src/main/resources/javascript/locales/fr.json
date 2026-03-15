@@ -2,7 +2,7 @@
   "label": "Exemple d'administration",
   "hello": "Bonjour {{name}} !",
   "search": {
-    "placeholder": "Rechercher…",
+    "placeholder": "Rechercher dans {{site}}…",
     "results": "{{count}} résultat(s)",
     "loadingMore": "Chargement…",
     "col": {

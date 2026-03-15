@@ -15,7 +15,7 @@ export const SearchSkeleton = () => (
           height: "76px",
           padding: "0 12px",
           gap: "12px",
-          borderBottom: "1px solid var(--color-gray_light_plain20)",
+          borderBottom: "1px solid var(--color-white)",
         }}
       >
         {/* Icon placeholder */}

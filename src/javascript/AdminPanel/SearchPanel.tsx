@@ -4,7 +4,7 @@ import type { Row } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SEARCH_QUERY, type SearchHit } from "./searchQuery.ts";
-import { getSiteKey, getLanguage, locateInJContent } from "./searchUtils.ts";
+import { getSiteKey, getSearchLanguage, locateInJContent } from "./searchUtils.ts";
 import { SearchSkeleton } from "./SearchSkeleton.tsx";
 
 
@@ -17,7 +17,7 @@ type SearchContentProps = {
 // Defined outside the component so they are stable object references.
 const stateContainer: React.CSSProperties = { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "80%", gap: "16px", userSelect: "none" };
 const stateHeading: React.CSSProperties = { fontSize: "26px", fontWeight: 800, color: "var(--color-dark)", letterSpacing: "-0.5px" };
-const stateBody: React.CSSProperties = { fontSize: "14px", color: "var(--color-gray)", textAlign: "center", maxWidth: "300px", lineHeight: 1.6 };
+const stateBody: React.CSSProperties = { fontSize: "14px", color: "var(--color-dark)", textAlign: "center", maxWidth: "300px", lineHeight: 1.6 };
 
 export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) => {
   const { t } = useTranslation();
@@ -66,7 +66,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
     currentQueryRef.current = trimmed;
     loadingPageRef.current = 0;
     void runSearch({
-      variables: { q: trimmed, siteKeys: [getSiteKey()], language: getLanguage(), page: 0 },
+      variables: { q: trimmed, siteKeys: [getSiteKey()], language: getSearchLanguage(), page: 0 },
     });
   };
 
@@ -77,7 +77,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
     const nextPage = loadingPageRef.current + 1;
     loadingPageRef.current = nextPage;
     void runSearch({
-      variables: { q: currentQueryRef.current, siteKeys: [getSiteKey()], language: getLanguage(), page: nextPage },
+      variables: { q: currentQueryRef.current, siteKeys: [getSiteKey()], language: getSearchLanguage(), page: nextPage },
     });
   };
 
@@ -142,7 +142,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
       {
         key: "displayableName" as const,
         label: "",
-        width: "calc(100% - 48px)",
+        width: "calc(100% - 32px)",
         render: (_value: unknown, row: SearchHit) => (
           <div style={{ minWidth: 0, width: "100%", padding: "6px 0" }}>
             {/* Row 1: displayable name */}
@@ -240,7 +240,10 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         .augmented-search-results .moonstone-tableCell:first-child { overflow: visible !important; }
 
         /* Ensure the hover-actions cell stretches to full row height and right-aligns */
-        .augmented-search-results .moonstone-tableCellActions { align-self: stretch; display: flex; align-items: center; justify-content: flex-end; }
+        .augmented-search-results .moonstone-tableCellActions { align-self: stretch; display: flex; align-items: center; justify-content: flex-end; padding-right: 2px; }
+
+        /* Remove Moonstone's light gray row border-bottom */
+        .augmented-search-results .moonstone-tableRow { border-bottom: 1px solid var(--color-gray) !important; margin-right: 8px; padding: 0 var(--spacing-small); }
 
         /* Keyboard focus ring: white gap + accent outline, rounded to match row shape */
         .augmented-search-results .moonstone-tableRow:focus,
@@ -252,7 +255,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         /* Skeleton shimmer animation for the loading state */
         @keyframes shimmer { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
         .augmented-skeleton {
-          background: linear-gradient(90deg, var(--color-gray_light_plain20) 25%, var(--color-gray_plain20) 50%, var(--color-gray_light_plain20) 75%);
+          background: linear-gradient(90deg, #e5e7eb 25%, #d1d5db 50%, #e5e7eb 75%);
           background-size: 600px 100%;
           animation: shimmer 1.2s infinite linear;
           border-radius: 4px;
@@ -262,7 +265,7 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
         <div ref={inputWrapperRef} style={{ flex: 1, fontSize: "1.5rem", minHeight: "36px" }} className="augmented-search-input">
           <Input
             size="big"
-            placeholder={t("search.placeholder", "Search…")}
+            placeholder={t("search.placeholder", "Search in {{site}}…", { site: getSiteKey() })}
             value={searchValue}
             icon={<Search />}
             focusOnField={focusOnField}
@@ -283,12 +286,12 @@ export const SearchContent = ({ focusOnField, onNavigate }: SearchContentProps) 
       </div>
 
       {(allHits.length > 0 || totalHits > 0) && (
-        <span style={{ fontSize: "12px", color: "var(--color-gray)" }}>
+        <span style={{ fontSize: "12px", color: "var(--color-dark)" }}>
           {t("search.results", "{{count}} result(s)", { count: totalHits })}
         </span>
       )}
 
-      <div ref={scrollContainerRef} style={{ overflowY: "auto", flex: 1, minWidth: 0, padding: "4px 4px 0" }}>
+      <div ref={scrollContainerRef} style={{ overflowY: "auto", flex: 1, minWidth: 0, padding: "4px 8px 0" }}>
         {/* ── Empty state (shown until user types 3+ chars) ── */}
         {trimmedQuery.length < 3 && (
           <div style={stateContainer}>

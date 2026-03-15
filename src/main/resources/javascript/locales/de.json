@@ -2,7 +2,7 @@
   "label": "Erweitertes Authoring",
   "hello": "Hallo {{name}}!",
   "search": {
-    "placeholder": "Suchen…",
+    "placeholder": "In {{site}} suchen…",
     "results": "{{count}} Ergebnis(se)",
     "loadingMore": "Mehr laden…",
     "col": {

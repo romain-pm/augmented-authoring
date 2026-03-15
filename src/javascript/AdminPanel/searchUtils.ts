@@ -15,8 +15,12 @@ export function getSiteKey(): string {
     : "default";
 }
 
-export function getLanguage(): string {
+export function getUiLanguage(): string {
   return window.contextJsParameters.uilang ?? "en";
+}
+
+export function getSearchLanguage(): string {
+  return window.contextJsParameters.lang ?? "en";
 }
 
 /**
@@ -26,7 +30,7 @@ export function getLanguage(): string {
  */
 export function locateInJContent(nodePath: string): void {
   const site = getSiteKey();
-  const language = getLanguage();
+  const language = getUiLanguage();
   const siteBase = `/sites/${site}`;
 
   let parentPath = nodePath;
