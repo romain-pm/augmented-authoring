@@ -77,7 +77,6 @@ export const SearchModal = () => {
             height: "88vh",
             overflow: "hidden",
             color: "var(--color-dark)",
-            display: "flex",
           }}
           role="dialog"
           aria-modal="true"
