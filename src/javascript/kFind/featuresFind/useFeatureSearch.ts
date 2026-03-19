@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { FeatureHit } from "../shared/searchQuery.ts";
+import type { FeatureHit } from "../augmentedFind/augmentedFindQuery.ts";
 import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
 
 export function useFeatureSearch(query: string): FeatureHit[] {

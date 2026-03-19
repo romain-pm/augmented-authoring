@@ -3,7 +3,7 @@ import { DataTable, EmptyData, Close, Typography } from "@jahia/moonstone";
 import type { Row } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
 import { FeatureResultCard } from "./FeatureResultCard.tsx";
-import type { FeatureHit } from "../shared/searchQuery.ts";
+import type { FeatureHit } from "../augmentedFind/augmentedFindQuery.ts";
 import hideTableHead from "../shared/hideTableHead.module.css";
 
 const featureColumns = [{ key: "label" as const, label: "" }];

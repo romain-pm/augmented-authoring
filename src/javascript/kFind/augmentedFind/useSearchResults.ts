@@ -4,7 +4,7 @@ import {
   SEARCH_QUERY,
   SITE_INDEX_QUERY,
   type SearchHit,
-} from "../shared/searchQuery.ts";
+} from "./augmentedFindQuery.ts";
 import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
 
 // Module-level cache: site key → whether it has jmix:augmentedSearchIndexableSite.

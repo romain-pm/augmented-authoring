@@ -12,7 +12,7 @@ import type { Row } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
 import { ResultCard } from "./ResultCard.tsx";
 import { FeatureResults } from "../featuresFind/FeatureResults.tsx";
-import type { SearchHit, FeatureHit } from "../shared/searchQuery.ts";
+import type { SearchHit, FeatureHit } from "./augmentedFindQuery.ts";
 import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
 import styles from "./SearchResultsView.module.css";
 import hideTableHead from "../shared/hideTableHead.module.css";
