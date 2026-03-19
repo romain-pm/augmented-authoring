@@ -4,8 +4,8 @@ import {
   SEARCH_QUERY,
   SITE_INDEX_QUERY,
   type SearchHit,
-} from "./searchQuery.ts";
-import { getSiteKey, getSearchLanguage } from "./searchUtils.ts";
+} from "../shared/searchQuery.ts";
+import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
 
 // Module-level cache: site key → whether it has jmix:augmentedSearchIndexableSite.
 // Populated once per site per page load — never re-queried.

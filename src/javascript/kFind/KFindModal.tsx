@@ -8,11 +8,11 @@ import {
   ModalHeader,
   Typography,
 } from "@jahia/moonstone";
-import { SearchContent } from "./SearchPanel.tsx";
+import { KFindPanel } from "./KFindPanel.tsx";
 import { getApolloClient, onApolloClientReady } from "./apolloClientBridge.ts";
-import { getSiteKey } from "./searchUtils.ts";
+import { getSiteKey } from "./shared/searchUtils.ts";
 
-export const SearchModal = () => {
+export const KFindModal = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [apolloClient, setApolloClientState] = useState(getApolloClient);
@@ -45,13 +45,10 @@ export const SearchModal = () => {
     }
 
     targets.forEach((t) => t.addEventListener("keydown", handleKeyDown));
-    window.addEventListener("augmented-authoring:open-search", handleOpenEvent);
+    window.addEventListener("kFind:open-search", handleOpenEvent);
     return () => {
       targets.forEach((t) => t.removeEventListener("keydown", handleKeyDown));
-      window.removeEventListener(
-        "augmented-authoring:open-search",
-        handleOpenEvent,
-      );
+      window.removeEventListener("kFind:open-search", handleOpenEvent);
     };
   }, []);
 
@@ -74,7 +71,7 @@ export const SearchModal = () => {
             })}
           />
           <ModalBody>
-            <SearchContent focusOnField onNavigate={() => setIsOpen(false)} />
+            <KFindPanel focusOnField onNavigate={() => setIsOpen(false)} />
           </ModalBody>
           <ModalFooter>
             <Typography variant="caption">

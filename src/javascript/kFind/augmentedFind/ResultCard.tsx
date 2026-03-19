@@ -8,8 +8,8 @@ import {
   Typography,
 } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import type { SearchHit } from "./searchQuery.ts";
-import { locateInJContent, sanitizeHtml } from "./searchUtils.ts";
+import type { SearchHit } from "../shared/searchQuery.ts";
+import { locateInJContent, sanitizeHtml } from "../shared/searchUtils.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const editNode = (path: string) =>

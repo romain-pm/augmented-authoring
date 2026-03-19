@@ -45,3 +45,9 @@ export type SearchHit = {
   excerpt: string | null;
   nodeType: string;
 };
+
+export type FeatureHit = {
+  key: string;
+  label: string;
+  path: string;
+};

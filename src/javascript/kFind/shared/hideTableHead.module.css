@@ -1,0 +1,3 @@
+.resultsTable :global(.moonstone-tableHead) {
+  display: none;
+}

@@ -309,9 +309,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jahia/moonstone@file:/tmp/moonstone-pkg::locator=augmented-authoring%40workspace%3A.":
+"@jahia/moonstone@file:/tmp/moonstone-pkg::locator=kFind%40workspace%3A.":
   version: 2.17.5
-  resolution: "@jahia/moonstone@file:/tmp/moonstone-pkg#/tmp/moonstone-pkg::hash=7373d9&locator=augmented-authoring%40workspace%3A."
+  resolution: "@jahia/moonstone@file:/tmp/moonstone-pkg#/tmp/moonstone-pkg::hash=7373d9&locator=kFind%40workspace%3A."
   dependencies:
     "@floating-ui/react": "npm:^0.27.16"
     "@tanstack/react-table": "npm:^8.21.3"
@@ -833,28 +833,6 @@ __metadata:
   checksum: 10c0/4c058baf6df1bc5a1697cf182e2029c58cd99975288a13f9e70068ef5d6f4e1f1fd7c4d2c3c4912eae44797d1725be9700995736deca441b39f3e66d8dee97ef
   languageName: node
   linkType: hard
-
-"augmented-authoring@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "augmented-authoring@workspace:."
-  dependencies:
-    "@apollo/client": "npm:^3.11.0"
-    "@jahia/moonstone": "file:/tmp/moonstone-pkg"
-    "@jahia/ui-extender": "npm:^1.2.0"
-    "@jahia/vite-federation-plugin": "npm:^0.1.1"
-    "@types/prop-types": "npm:^15"
-    "@types/react": "npm:^18.3.28"
-    "@types/react-dom": "npm:^18"
-    graphql: "npm:^16.13.1"
-    i18next: "npm:^20.6.1"
-    prop-types: "npm:^15.8.1"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    react-i18next: "npm:^11.2.2"
-    typescript: "npm:^5.9.3"
-    vite: "npm:^7.3.1"
-  languageName: unknown
-  linkType: soft
 
 "axios@npm:^1.12.0":
   version: 1.13.6
@@ -1734,6 +1712,28 @@ __metadata:
   checksum: 10c0/7f4f43b08d1869ded8a6822213d13ae3b99d651151d77efd1557ced0889c466296a7d9684e397bd126acf5eb2cfcb605808c3e681d0fdccd2fe5a04b47e76c0d
   languageName: node
   linkType: hard
+
+"kFind@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "kFind@workspace:."
+  dependencies:
+    "@apollo/client": "npm:^3.11.0"
+    "@jahia/moonstone": "file:/tmp/moonstone-pkg"
+    "@jahia/ui-extender": "npm:^1.2.0"
+    "@jahia/vite-federation-plugin": "npm:^0.1.1"
+    "@types/prop-types": "npm:^15"
+    "@types/react": "npm:^18.3.28"
+    "@types/react-dom": "npm:^18"
+    graphql: "npm:^16.13.1"
+    i18next: "npm:^20.6.1"
+    prop-types: "npm:^15.8.1"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    react-i18next: "npm:^11.2.2"
+    typescript: "npm:^5.9.3"
+    vite: "npm:^7.3.1"
+  languageName: unknown
+  linkType: soft
 
 "keygrip@npm:~1.1.0":
   version: 1.1.0

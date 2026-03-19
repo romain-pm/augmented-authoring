@@ -1,19 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Input, Search, Typography } from "@jahia/moonstone";
+import { Input, Search } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import { useSearchResults } from "./useSearchResults.ts";
-import { useInfiniteScroll } from "./useInfiniteScroll.ts";
-import { SearchResultsView } from "./SearchResultsView.tsx";
+import { useSearchResults } from "./augmentedFind/useSearchResults.ts";
+import { useInfiniteScroll } from "./augmentedFind/useInfiniteScroll.ts";
+import { useFeatureSearch } from "./featuresFind/useFeatureSearch.ts";
+import { SearchResultsView } from "./augmentedFind/SearchResultsView.tsx";
 
-type SearchContentProps = {
+type KFindPanelProps = {
   focusOnField?: boolean;
   onNavigate?: () => void;
 };
 
-export const SearchContent = ({
-  focusOnField,
-  onNavigate,
-}: SearchContentProps) => {
+export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState("");
   const inputWrapperRef = useRef<HTMLDivElement>(null);
@@ -30,6 +28,8 @@ export const SearchContent = ({
   } = useSearchResults(searchValue);
 
   const { scrollContainerRef, sentinelRef } = useInfiniteScroll(loadNextPage);
+
+  const featureHits = useFeatureSearch(searchValue);
 
   // Keep the moonstone clear button out of the tab order — moonstone doesn't
   // expose a prop for this, so we patch it via a MutationObserver that fires
@@ -56,7 +56,7 @@ export const SearchContent = ({
     // Outer flex column — fills the full height of the ModalBody
     <div>
       {/* ── Search input ── */}
-      <div>
+      <div style={{ marginBottom: "16px" }}>
         <div ref={inputWrapperRef}>
           <Input
             size="big"
@@ -85,19 +85,14 @@ export const SearchContent = ({
         </div>
       </div>
 
-      {/* ── Result count — only shown once at least one hit exists ── */}
-      {(hits.length > 0 || totalHits > 0) && (
-        <Typography variant="caption">
-          {t("search.results", "{{count}} result(s)", { count: totalHits })}
-        </Typography>
-      )}
-
       <SearchResultsView
         isSiteIndexed={isSiteIndexed}
         searchEnabled={searchEnabled}
         trimmedQuery={trimmedQuery}
         loading={loading}
         hits={hits}
+        totalHits={totalHits}
+        featureHits={featureHits}
         currentQuery={currentQueryRef.current}
         scrollContainerRef={scrollContainerRef}
         sentinelRef={sentinelRef}
@@ -107,5 +102,3 @@ export const SearchContent = ({
     </div>
   );
 };
-
-export const SearchPanel = () => <SearchContent focusOnField />;

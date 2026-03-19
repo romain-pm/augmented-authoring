@@ -1,10 +1,10 @@
 import { registry } from "@jahia/ui-extender";
-import { registerRoutes } from "./AdminPanel/routes.tsx";
+import { registerRoutes } from "./kFind/routes.tsx";
 
 export default function () {
-  registry.add("callback", "augmented-authoring", {
+  registry.add("callback", "kFind", {
     targets: ["jahiaApp-init:2"],
-    requireModuleInstalledOnSite: "augmented-authoring",
+    requireModuleInstalledOnSite: "kFind",
     callback: registerRoutes,
   });
 }
