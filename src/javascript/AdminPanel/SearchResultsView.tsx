@@ -13,6 +13,9 @@ import { useTranslation } from "react-i18next";
 import { ResultCard } from "./ResultCard.tsx";
 import type { SearchHit } from "./searchQuery.ts";
 
+// Static — no render function, so a stable reference avoids unnecessary DataTable re-diffs.
+const columns = [{ key: "displayableName" as const, label: "" }];
+
 type SearchResultsViewProps = {
   isSiteIndexed: boolean | null;
   searchEnabled: boolean;
@@ -42,8 +45,7 @@ export const SearchResultsView = ({
 }: SearchResultsViewProps) => {
   const { t } = useTranslation();
 
-  const columns = [{ key: "displayableName" as const, label: "" }];
-
+  // ResultCard renders its own <TableRow>, so DataTable's defaultRender is intentionally bypassed.
   const renderRow = useCallback(
     (row: Row<SearchHit>) => (
       <ResultCard
@@ -54,7 +56,7 @@ export const SearchResultsView = ({
         inputWrapperRef={inputWrapperRef}
       />
     ),
-    [onNavigate, scrollContainerRef, inputWrapperRef],
+    [onNavigate],
   );
 
   return (

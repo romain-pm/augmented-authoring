@@ -9,7 +9,7 @@ import {
 } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
 import type { SearchHit } from "./searchQuery.ts";
-import { locateInJContent } from "./searchUtils.ts";
+import { locateInJContent, sanitizeHtml } from "./searchUtils.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const editNode = (path: string) =>
@@ -106,7 +106,9 @@ export const ResultCard = ({
                 overflow: "hidden",
               }}
             >
-              <span dangerouslySetInnerHTML={{ __html: hit.excerpt }} />
+              <span
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(hit.excerpt) }}
+              />
             </Typography>
           )}
         </div>
