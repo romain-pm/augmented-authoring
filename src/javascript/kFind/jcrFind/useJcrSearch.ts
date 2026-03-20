@@ -76,7 +76,7 @@ export const useJcrSearch = (): ContentSearchDriver => {
       } else {
         void runNodesByQuery({
           variables: {
-            query: buildJcrSql2(query),
+            query: buildJcrSql2(query, `/sites/${getSiteKey()}`),
             limit: PAGE_SIZE,
             offset: page * PAGE_SIZE,
           },

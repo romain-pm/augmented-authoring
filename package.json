@@ -28,6 +28,9 @@
     "remotes": {
       "jahia": "javascript/apps/remoteEntry.js"
     },
+    "apps": {
+      "jahia": "configs/kFind.jsp"
+    },
     "urlPatterns": {
       "jahia": "/administration/(?<siteKey>\\S*?)/settings/(?<settingName>\\S*)"
     }

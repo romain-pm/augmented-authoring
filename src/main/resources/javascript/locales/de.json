@@ -2,9 +2,9 @@
   "label": "kFind",
   "search": {
     "placeholder": "Suchen…",
-    "results": "{{count}} Ergebnis(se)",
     "loading": "Suche läuft…",
     "loadingMore": "Mehr laden…",
+    "showMore": "Mehr anzeigen ({{count}} Ergebnisse)",
     "action": {
       "edit": "Bearbeiten"
     },

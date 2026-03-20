@@ -65,11 +65,26 @@ export const KFindModal = () => {
         style={{ width: "800px" }}
       >
         <>
-          <ModalHeader
-            title={t("search.modal.title", "Search in {{site}}", {
-              site: getSiteKey(),
-            })}
-          />
+          <div style={{ position: "relative" }}>
+            <ModalHeader
+              title={t("search.modal.title", "Search in {{site}}", {
+                site: getSiteKey(),
+              })}
+            />
+            <Typography
+              variant="caption"
+              style={{
+                position: "absolute",
+                top: "50%",
+                right: "48px",
+                transform: "translateY(-50%)",
+                opacity: 0.4,
+                pointerEvents: "none",
+              }}
+            >
+              {new Date(__BUILD_TIME__).toLocaleString()}
+            </Typography>
+          </div>
           <ModalBody>
             <KFindPanel focusOnField onNavigate={() => setIsOpen(false)} />
           </ModalBody>

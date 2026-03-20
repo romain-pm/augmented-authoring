@@ -68,9 +68,10 @@ export function escapeJcrSql2(value: string): string {
   return value.replace(/'/g, "''");
 }
 
-export function buildJcrSql2(searchTerm: string): string {
-  const escaped = escapeJcrSql2(searchTerm);
-  return `SELECT * FROM [jmix:mainResource] as mainResource WHERE contains(mainResource.*, '${escaped}') ORDER BY mainResource.[j:lastModified] DESC`;
+export function buildJcrSql2(searchTerm: string, sitePath: string): string {
+  const escapedTerm = escapeJcrSql2(searchTerm);
+  const escapedPath = escapeJcrSql2(sitePath);
+  return `SELECT * FROM [nt:base] as node WHERE (node.[jcr:primaryType] = 'jnt:page' or node.[jcr:mixinTypes] = 'jmix:mainResource') AND ISDESCENDANTNODE(node, '${escapedPath}') AND contains(node.*, '${escapedTerm}') ORDER BY node.[j:lastModified] DESC`;
 }
 
 export function buildNodesByCriteriaVariables(

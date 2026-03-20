@@ -23,13 +23,11 @@ export const useAugmentedSearch = (): ContentSearchDriver => {
       const newHits = result?.search?.results?.hits ?? [];
       const total = result?.search?.results?.totalHits ?? 0;
       const page = pageRef.current;
+      const nextHits =
+        page === 0 ? newHits : [...allHitsRef.current, ...newHits];
       setTotalHits(total);
-      setHasMore(
-        (page === 0
-          ? newHits.length
-          : allHitsRef.current.length + newHits.length) < total,
-      );
-      setAllHits((prev) => (page === 0 ? newHits : [...prev, ...newHits]));
+      setHasMore(nextHits.length < total);
+      setAllHits(nextHits);
     },
   });
 

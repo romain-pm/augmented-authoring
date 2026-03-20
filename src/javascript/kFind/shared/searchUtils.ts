@@ -46,6 +46,23 @@ export function getMinSearchChars(): number {
   return window.contextJsParameters.kFind?.minSearchChars ?? 3;
 }
 
+export function getDefaultDisplayedResults(): number {
+  return window.contextJsParameters.kFind?.defaultDisplayedResults ?? 5;
+}
+
+export function getAugmentedFindDelay(): number {
+  return (
+    window.contextJsParameters.kFind
+      ?.augmentedFindDelayInTypingToLaunchSearch ?? 300
+  );
+}
+
+export function getJcrFindDelay(): number {
+  return (
+    window.contextJsParameters.kFind?.jcrFindDelayInTypingToLaunchSearch ?? 300
+  );
+}
+
 /**
  * Navigates the parent jContent SPA to the given node path by pushing a new
  * URL into its history and firing a synthetic popstate so React Router picks

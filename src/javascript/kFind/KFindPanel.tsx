@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Input, Search } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
 import { useContentSearch } from "./shared/useContentSearch.ts";
-import { useInfiniteScroll } from "./shared/useInfiniteScroll.ts";
 import { useFeatureSearch } from "./featuresFind/useFeatureSearch.ts";
 import { SearchResultsView } from "./shared/SearchResultsView.tsx";
 
@@ -15,17 +14,17 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState("");
   const inputWrapperRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     hits,
     totalHits,
     loading,
+    hasMore,
     currentQueryRef,
     triggerSearch,
     loadNextPage,
   } = useContentSearch(searchValue);
-
-  const { scrollContainerRef, sentinelRef } = useInfiniteScroll(loadNextPage);
 
   const featureHits = useFeatureSearch(searchValue);
 
@@ -88,12 +87,13 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
         loading={loading}
         hits={hits}
         totalHits={totalHits}
+        hasMore={hasMore}
         featureHits={featureHits}
         currentQuery={currentQueryRef.current}
         scrollContainerRef={scrollContainerRef}
-        sentinelRef={sentinelRef}
         inputWrapperRef={inputWrapperRef}
         onNavigate={onNavigate}
+        onLoadMore={loadNextPage}
       />
     </div>
   );

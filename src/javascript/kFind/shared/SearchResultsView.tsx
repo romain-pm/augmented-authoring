@@ -1,5 +1,6 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
+  Button,
   DataTable,
   EmptyData,
   Loader,
@@ -16,6 +17,7 @@ import {
   getSiteKey,
   getSearchLanguage,
   getMinSearchChars,
+  getDefaultDisplayedResults,
 } from "./searchUtils.ts";
 import styles from "./SearchResultsView.module.css";
 import hideTableHead from "./hideTableHead.module.css";
@@ -28,14 +30,15 @@ type SearchResultsViewProps = {
   loading: boolean;
   hits: SearchHit[];
   totalHits: number;
+  hasMore: boolean;
   featureHits: FeatureHit[];
   /** The query string of the last completed search — used to gate the no-results state. */
   currentQuery: string;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
-  sentinelRef: React.RefObject<HTMLDivElement>;
   /** Ref to the input wrapper — used to refocus the input on ArrowUp from first row. */
   inputWrapperRef: React.RefObject<HTMLDivElement>;
   onNavigate?: () => void;
+  onLoadMore: () => void;
 };
 
 export const SearchResultsView = ({
@@ -43,14 +46,35 @@ export const SearchResultsView = ({
   loading,
   hits,
   totalHits,
+  hasMore,
   featureHits,
   currentQuery,
   scrollContainerRef,
-  sentinelRef,
   inputWrapperRef,
   onNavigate,
+  onLoadMore,
 }: SearchResultsViewProps) => {
   const { t } = useTranslation();
+  const [displayedCount, setDisplayedCount] = useState(
+    getDefaultDisplayedResults,
+  );
+
+  // Reset to the default page size whenever the query changes.
+  useEffect(() => {
+    setDisplayedCount(getDefaultDisplayedResults());
+  }, [trimmedQuery]);
+
+  const visibleHits = hits.slice(0, displayedCount);
+  const hasMoreToShow = displayedCount < hits.length || hasMore;
+
+  const handleShowMore = () => {
+    const newCount = displayedCount + getDefaultDisplayedResults();
+    setDisplayedCount(newCount);
+    // If we've exhausted locally loaded hits and the server has more, fetch the next page.
+    if (newCount >= hits.length && hasMore) {
+      onLoadMore();
+    }
+  };
 
   // ResultCard renders its own <TableRow>, so DataTable's defaultRender is intentionally bypassed.
   const renderContentRow = useCallback(
@@ -67,11 +91,6 @@ export const SearchResultsView = ({
   );
 
   return (
-    /*
-     * Scrollable results area — also serves as the IntersectionObserver root
-     * for infinite scroll. The sentinel <div> at the bottom of this container
-     * triggers the next-page load when it scrolls into view.
-     */
     <div ref={scrollContainerRef} className={styles.scrollContainer}>
       {/* ── Empty state (shown until user types enough chars, and only when features haven't kicked in yet) ── */}
       {trimmedQuery.length < getMinSearchChars() &&
@@ -110,15 +129,6 @@ export const SearchResultsView = ({
             )}
           </Typography>
 
-          {/* ── Result count ── */}
-          {(hits.length > 0 || totalHits > 0) && (
-            <Typography variant="caption">
-              {t("search.results", "{{count}} result(s)", {
-                count: totalHits,
-              })}
-            </Typography>
-          )}
-
           {/* Loading */}
           {loading && hits.length === 0 && (
             <EmptyData
@@ -141,23 +151,29 @@ export const SearchResultsView = ({
           )}
         </>
       )}
+
       <DataTable<SearchHit>
         className={hideTableHead.resultsTable}
-        data={hits}
+        data={visibleHits}
         primaryKey="id"
         columns={contentColumns}
         renderRow={renderContentRow}
       />
 
-      {/* Sentinel triggers IntersectionObserver to load the next page */}
-      <div ref={sentinelRef} style={{ height: "1px" }} />
-
       {loading && hits.length > 0 && (
-        <div>
-          <Typography variant="caption">
-            {t("search.loadingMore", "Loading more…")}
-          </Typography>
-        </div>
+        <Typography variant="caption">
+          {t("search.loadingMore", "Loading more…")}
+        </Typography>
+      )}
+
+      {!loading && hasMoreToShow && (
+        <Button
+          variant="ghost"
+          label={t("search.showMore", "Show more ({{count}} results)", {
+            count: totalHits,
+          })}
+          onClick={handleShowMore}
+        />
       )}
     </div>
   );

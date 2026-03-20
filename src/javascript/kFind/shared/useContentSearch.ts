@@ -3,7 +3,12 @@ import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { SITE_INDEX_QUERY } from "../augmentedFind/augmentedFindQuery.ts";
 import { useAugmentedSearch } from "../augmentedFind/useAugmentedSearch.ts";
 import { useJcrSearch } from "../jcrFind/useJcrSearch.ts";
-import { getSiteKey, getMinSearchChars } from "./searchUtils.ts";
+import {
+  getSiteKey,
+  getMinSearchChars,
+  getAugmentedFindDelay,
+  getJcrFindDelay,
+} from "./searchUtils.ts";
 import type { SearchHit } from "./searchTypes.ts";
 
 // Module-level cache: site key → whether augmented search is available.
@@ -14,6 +19,7 @@ type UseContentSearchReturn = {
   hits: SearchHit[];
   totalHits: number;
   loading: boolean;
+  hasMore: boolean;
   currentQueryRef: MutableRefObject<string>;
   triggerSearch: (value: string) => void;
   loadNextPage: () => void;
@@ -102,7 +108,8 @@ export const useContentSearch = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkDone]);
 
-  // Debounce: wait 300 ms after the user stops typing before firing the query.
+  // Debounce: wait after the user stops typing before firing the query.
+  // Delay depends on whether augmented or JCR search is active.
   // If input drops below the minimum, reset immediately without debouncing.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -110,9 +117,12 @@ export const useContentSearch = (
       resetSearch();
       return;
     }
+    const delay = isAugmentedRef.current
+      ? getAugmentedFindDelay()
+      : getJcrFindDelay();
     debounceRef.current = setTimeout(() => {
       triggerSearch(searchValue);
-    }, 300);
+    }, delay);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -123,6 +133,7 @@ export const useContentSearch = (
     hits: active.hits,
     totalHits: active.totalHits,
     loading: active.loading,
+    hasMore: active.hasMore,
     currentQueryRef,
     triggerSearch,
     loadNextPage,
