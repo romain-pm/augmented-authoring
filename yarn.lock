@@ -311,7 +311,7 @@ __metadata:
 
 "@jahia/moonstone@file:/tmp/moonstone-pkg::locator=kFind%40workspace%3A.":
   version: 2.17.5
-  resolution: "@jahia/moonstone@file:/tmp/moonstone-pkg#/tmp/moonstone-pkg::hash=7373d9&locator=kFind%40workspace%3A."
+  resolution: "@jahia/moonstone@file:/tmp/moonstone-pkg#/tmp/moonstone-pkg::hash=1984a7&locator=kFind%40workspace%3A."
   dependencies:
     "@floating-ui/react": "npm:^0.27.16"
     "@tanstack/react-table": "npm:^8.21.3"
@@ -322,7 +322,7 @@ __metadata:
     react: ^18.3.1
     react-dom: ^18.3.1
     react-table: ^7.8.0
-  checksum: 10c0/0b24617281ae85265dce1352215789d75bebf783b560dcc397d4619997711ce491040ed4066c8df8fa7e1823f7628a3653347008ea97e596422204e77b5acf05
+  checksum: 10c0/2090ccc17cd46baea602b44278131b9924b24ffaa4779981707ffc266eb5c7c02842e5e285207384213600dfb1cb30e8129df924ac7db57ecd395cee8fbe7b6b
   languageName: node
   linkType: hard
 

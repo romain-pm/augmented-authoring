@@ -1,15 +1,10 @@
 {
-  "label": "Augmented authoring",
-  "hello": "Hello {{name}}!",
+  "label": "kFind",
   "search": {
     "placeholder": "Search…",
     "results": "{{count}} result(s)",
+    "loading": "Searching…",
     "loadingMore": "Loading more…",
-    "col": {
-      "title": "Title & excerpt",
-      "type": "Type",
-      "lastModified": "Last modified"
-    },
     "action": {
       "edit": "Edit"
     },
@@ -20,16 +15,19 @@
     },
     "empty": {
       "title": "Find anything.",
-      "hint": "Pages, content, documents, ...",
-      "hint2": "Just start typing (3 chars min)."
+      "hint": "Pages, content, documents — just start typing ({{min}} chars min)."
     },
     "noResults": {
       "title": "No results.",
       "hint": "Nothing matched \"{{q}}\". Try different keywords or check for typos."
     },
-    "notIndexed": {
-      "title": "Search unavailable.",
-      "hint": "This site is not indexed for augmented search. Ask an administrator to enable it."
+    "content": {
+      "title": "Pages, content and documents in {{site}}, in {{language}}"
+    },
+    "features": {
+      "title": "Features",
+      "chip": "Feature",
+      "empty": "No matching features."
     }
   }
 }

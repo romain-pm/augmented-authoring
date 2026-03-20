@@ -42,6 +42,10 @@ export function getSearchLanguage(): string {
   return window.contextJsParameters.lang ?? "en";
 }
 
+export function getMinSearchChars(): number {
+  return window.contextJsParameters.kFind?.minSearchChars ?? 3;
+}
+
 /**
  * Navigates the parent jContent SPA to the given node path by pushing a new
  * URL into its history and firing a synthetic popstate so React Router picks

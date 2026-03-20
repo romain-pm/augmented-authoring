@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Input, Search } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import { useSearchResults } from "./augmentedFind/useSearchResults.ts";
-import { useInfiniteScroll } from "./augmentedFind/useInfiniteScroll.ts";
+import { useContentSearch } from "./shared/useContentSearch.ts";
+import { useInfiniteScroll } from "./shared/useInfiniteScroll.ts";
 import { useFeatureSearch } from "./featuresFind/useFeatureSearch.ts";
-import { SearchResultsView } from "./augmentedFind/SearchResultsView.tsx";
+import { SearchResultsView } from "./shared/SearchResultsView.tsx";
 
 type KFindPanelProps = {
   focusOnField?: boolean;
@@ -20,12 +20,10 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
     hits,
     totalHits,
     loading,
-    isSiteIndexed,
-    searchEnabled,
     currentQueryRef,
     triggerSearch,
     loadNextPage,
-  } = useSearchResults(searchValue);
+  } = useContentSearch(searchValue);
 
   const { scrollContainerRef, sentinelRef } = useInfiniteScroll(loadNextPage);
 
@@ -63,9 +61,9 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
             placeholder={t("search.placeholder", "Search…")}
             value={searchValue}
             icon={<Search />}
-            focusOnField={focusOnField && searchEnabled}
+            focusOnField={focusOnField}
             onChange={(e) => {
-              if (searchEnabled) setSearchValue(e.target.value);
+              setSearchValue(e.target.value);
             }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
@@ -86,8 +84,6 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
       </div>
 
       <SearchResultsView
-        isSiteIndexed={isSiteIndexed}
-        searchEnabled={searchEnabled}
         trimmedQuery={trimmedQuery}
         loading={loading}
         hits={hits}

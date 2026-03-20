@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Button,
   Chip,
@@ -8,14 +8,14 @@ import {
   Typography,
 } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import type { SearchHit } from "./augmentedFindQuery.ts";
-import { locateInJContent, sanitizeHtml } from "../shared/searchUtils.ts";
+import type { SearchHit } from "./searchTypes.ts";
+import { locateInJContent, sanitizeHtml } from "./searchUtils.ts";
+import s from "./ResultCard.module.css";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const editNode = (path: string) =>
   (window.parent as any).CE_API?.edit({ path });
 
-const ROW_HEIGHT = "96px";
 const MAX_NAME_LENGTH = 80;
 
 type ResultCardProps = {
@@ -32,7 +32,6 @@ export const ResultCard = ({
   inputWrapperRef,
 }: ResultCardProps) => {
   const { t } = useTranslation();
-  const [hovered, setHovered] = useState(false);
 
   const displayableName =
     hit.displayableName.length > MAX_NAME_LENGTH
@@ -68,44 +67,22 @@ export const ResultCard = ({
 
   return (
     <TableRow
-      style={{ height: ROW_HEIGHT, cursor: "pointer" }}
+      className={s.resultRow}
       onClick={() => {
         locateInJContent(hit.path);
         onNavigate?.();
       }}
       onKeyDown={handleKeyDown}
     >
-      {/* Two-column layout: content | action */}
-      <div
-        style={{ display: "flex", alignItems: "center", width: "100%" }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        {/* Column 1: content */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
+      <div className={s.resultRowContent}>
+        <div className={s.resultRowInfo}>
           <Typography variant="subHeading">{displayableName}</Typography>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className={s.resultRowMeta}>
             <Chip color="accent" label={hit.nodeType} />
             <Typography variant="caption">{hit.path}</Typography>
           </div>
           {hit.excerpt && (
-            <Typography
-              variant="body"
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
+            <Typography variant="caption" className={s.resultRowExcerpt}>
               <span
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(hit.excerpt) }}
               />
@@ -113,17 +90,7 @@ export const ResultCard = ({
           )}
         </div>
 
-        {/* Column 2: edit action, fixed 32px, visible on hover */}
-        <div
-          style={{
-            width: "32px",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            visibility: hovered ? "visible" : "hidden",
-          }}
-        >
+        <div className={s.resultRowAction}>
           <Tooltip label={t("search.action.edit", "Edit")}>
             <Button
               size="big"

@@ -1,0 +1,44 @@
+.resultRow {
+  height: 96px;
+  cursor: pointer;
+}
+
+.resultRowContent {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.resultRowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.resultRowMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resultRowExcerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.resultRowAction {
+  width: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+}
+
+.resultRow:hover .resultRowAction {
+  visibility: visible;
+}

@@ -56,7 +56,7 @@ export const KFindModal = () => {
 
   return (
     <ApolloProvider client={apolloClient}>
-      <style>{`.search-modal.moonstone-modal { top: 72px; bottom: 72px; height: auto; max-height: none; }`}</style>
+      <style>{`.search-modal.moonstone-modal { top: 48px; bottom: 48px; height: auto; max-height: none; }`}</style>
       <Modal
         isOpen={isOpen}
         onOpenChange={setIsOpen}

@@ -1,15 +1,10 @@
 {
-  "label": "Exemple d'administration",
-  "hello": "Bonjour {{name}} !",
+  "label": "kFind",
   "search": {
     "placeholder": "Rechercher…",
     "results": "{{count}} résultat(s)",
+    "loading": "Recherche en cours…",
     "loadingMore": "Chargement…",
-    "col": {
-      "title": "Titre & extrait",
-      "type": "Type",
-      "lastModified": "Dernière modification"
-    },
     "action": {
       "edit": "Modifier"
     },
@@ -20,15 +15,19 @@
     },
     "empty": {
       "title": "Trouvez n'importe quoi.",
-      "hint": "Pages, contenus, documents… Commencez à taper (3 caractères min)."
+      "hint": "Pages, contenus, documents — commencez à taper ({{min}} caractères min)."
     },
     "noResults": {
       "title": "Aucun résultat.",
       "hint": "Aucun résultat pour « {{q}} ». Essayez d'autres mots-clés ou vérifiez l'orthographe."
     },
-    "notIndexed": {
-      "title": "Recherche indisponible.",
-      "hint": "Ce site n'est pas indexé pour la recherche augmentée. Demandez à un administrateur de l'activer."
+    "content": {
+      "title": "Pages, contenus et documents dans {{site}}, en {{language}}"
+    },
+    "features": {
+      "title": "Fonctionnalités",
+      "chip": "Fonctionnalité",
+      "empty": "Aucune fonctionnalité correspondante."
     }
   }
 }

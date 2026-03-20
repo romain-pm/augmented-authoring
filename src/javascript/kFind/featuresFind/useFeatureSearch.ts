@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { FeatureHit } from "../augmentedFind/augmentedFindQuery.ts";
+import type { FeatureHit } from "../shared/searchTypes.ts";
 import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
 
 export function useFeatureSearch(query: string): FeatureHit[] {
@@ -14,7 +14,8 @@ export function useFeatureSearch(query: string): FeatureHit[] {
 
     const results: FeatureHit[] = [];
     for (const entry of Object.values(registry)) {
-      if (entry.type !== "adminRoute") continue;
+      if (entry.type !== "adminRoute" && entry.type !== "jExperienceMenuEntry")
+        continue;
       const label = entry.label ? t(entry.label) : entry.key;
       if (
         label.toLowerCase().includes(trimmed) ||
@@ -22,7 +23,11 @@ export function useFeatureSearch(query: string): FeatureHit[] {
       ) {
         const targetIds = (entry.targets ?? []).map((tgt) => tgt.id);
         let path: string;
-        if (targetIds.some((id) => id.startsWith("jcontent"))) {
+        if (entry.type === "jExperienceMenuEntry") {
+          // jExperience has its own app section — use the entry's path property.
+          const entryPath = (entry.path ?? entry.key).replace(/^\//, "");
+          path = `/jexperience/${getSiteKey()}/${entryPath}`;
+        } else if (targetIds.some((id) => id.startsWith("jcontent"))) {
           // jcontent app route: /jcontent/{site}/{lang}/apps/{key}
           path = `/jcontent/${getSiteKey()}/${getSearchLanguage()}/apps/${entry.key}`;
         } else if (targetIds.some((id) => id.includes("server"))) {

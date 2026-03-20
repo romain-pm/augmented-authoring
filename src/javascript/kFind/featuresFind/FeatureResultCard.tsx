@@ -1,7 +1,7 @@
 import React from "react";
 import { Chip, TableRow, Typography } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import type { FeatureHit } from "../augmentedFind/augmentedFindQuery.ts";
+import type { FeatureHit } from "../shared/searchTypes.ts";
 import styles from "./FeatureResultCard.module.css";
 
 type FeatureResultCardProps = {

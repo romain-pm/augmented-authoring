@@ -1,0 +1,59 @@
+import { useLazyQuery } from "@apollo/client";
+import { useRef, useState } from "react";
+import { SEARCH_QUERY } from "./augmentedFindQuery.ts";
+import type { SearchHit, ContentSearchDriver } from "../shared/searchTypes.ts";
+import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
+
+const PAGE_SIZE = 10;
+
+export const useAugmentedSearch = (): ContentSearchDriver => {
+  const [allHits, setAllHits] = useState<SearchHit[]>([]);
+  const [totalHits, setTotalHits] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const pageRef = useRef(0);
+  // Tracks the current accumulated hits count without needing a state read inside onCompleted.
+  const allHitsRef = useRef<SearchHit[]>(allHits);
+  allHitsRef.current = allHits;
+
+  const [runSearch, { loading }] = useLazyQuery<{
+    search: { results: { totalHits: number; hits: SearchHit[] } };
+  }>(SEARCH_QUERY, {
+    fetchPolicy: "network-only",
+    onCompleted: (result) => {
+      const newHits = result?.search?.results?.hits ?? [];
+      const total = result?.search?.results?.totalHits ?? 0;
+      const page = pageRef.current;
+      setTotalHits(total);
+      setHasMore(
+        (page === 0
+          ? newHits.length
+          : allHitsRef.current.length + newHits.length) < total,
+      );
+      setAllHits((prev) => (page === 0 ? newHits : [...prev, ...newHits]));
+    },
+  });
+
+  return {
+    hits: allHits,
+    totalHits,
+    loading,
+    hasMore,
+    search: (query, page) => {
+      pageRef.current = page;
+      void runSearch({
+        variables: {
+          q: query,
+          siteKeys: [getSiteKey()],
+          language: getSearchLanguage(),
+          size: PAGE_SIZE,
+          page,
+        },
+      });
+    },
+    reset: () => {
+      setAllHits([]);
+      setTotalHits(0);
+      setHasMore(false);
+    },
+  };
+};

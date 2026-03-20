@@ -1,15 +1,10 @@
 {
-  "label": "Erweitertes Authoring",
-  "hello": "Hallo {{name}}!",
+  "label": "kFind",
   "search": {
     "placeholder": "Suchen…",
     "results": "{{count}} Ergebnis(se)",
+    "loading": "Suche läuft…",
     "loadingMore": "Mehr laden…",
-    "col": {
-      "title": "Titel & Auszug",
-      "type": "Typ",
-      "lastModified": "Zuletzt geändert"
-    },
     "action": {
       "edit": "Bearbeiten"
     },
@@ -20,16 +15,19 @@
     },
     "empty": {
       "title": "Alles finden.",
-      "hint": "Seiten, Inhalte, Dokumente … Einfach tippen (mind. 3 Zeichen).",
-      "hint2": "Versuchen Sie andere Begriffe oder prüfen Sie die Schreibweise."
+      "hint": "Seiten, Inhalte, Dokumente — einfach tippen (mind. {{min}} Zeichen)."
     },
     "noResults": {
       "title": "Keine Ergebnisse.",
       "hint": "Keine Treffer für \"{{q}}\". Versuchen Sie andere Begriffe oder prüfen Sie die Schreibweise."
     },
-    "notIndexed": {
-      "title": "Suche nicht verfügbar.",
-      "hint": "Diese Website ist nicht für die erweiterte Suche indiziert. Bitten Sie einen Administrator, dies zu aktivieren."
+    "content": {
+      "title": "Seiten, Inhalte und Dokumente in {{site}}, auf {{language}}"
+    },
+    "features": {
+      "title": "Funktionen",
+      "chip": "Funktion",
+      "empty": "Keine passenden Funktionen."
     }
   }
 }
