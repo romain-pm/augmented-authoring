@@ -14,7 +14,8 @@
     },
     "npx tsc": true,
     "git fetch": true,
-    "git checkout": true
+    "git checkout": true,
+    "git rebase": true
   },
   "i18n-ally.keystyle": "nested"
 }
