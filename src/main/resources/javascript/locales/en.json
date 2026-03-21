@@ -16,7 +16,7 @@
     },
     "empty": {
       "title": "Find anything.",
-      "hint": "Pages, content, documents — just start typing ({{min}} chars min)."
+      "hint": "Features, Pages, Full Page contents, Media, Documents - just start typing ({{min}} chars min)."
     },
     "noResults": {
       "title": "No results.",

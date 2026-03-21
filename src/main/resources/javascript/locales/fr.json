@@ -16,7 +16,7 @@
     },
     "empty": {
       "title": "Trouvez n'importe quoi.",
-      "hint": "Pages, contenus, documents — commencez à taper ({{min}} caractères min)."
+      "hint": "Fonctionnalités, Pages, Contenus pleine page, Médias, Documents - commencez à taper ({{min}} caractères min)."
     },
     "noResults": {
       "title": "Aucun résultat.",
