@@ -1,9 +1,10 @@
 {
-  "name": "kFind",
+  "name": "kfind",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "build:dev": "vite build --mode development"
   },
   "dependencies": {
     "@apollo/client": "^3.11.0",

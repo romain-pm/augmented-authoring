@@ -1,12 +1,16 @@
 import { defineConfig } from "vite";
 import jahia from "@jahia/vite-federation-plugin";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   define: {
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   build: {
     outDir: "./src/main/resources/javascript/apps/",
+    // In development mode: emit source maps and skip minification for easier
+    // browser-DevTools debugging. Production build stays compact.
+    sourcemap: mode === "development" ? "inline" : false,
+    minify: mode === "development" ? false : "esbuild",
   },
   plugins: [
     jahia({
@@ -21,4 +25,4 @@ export default defineConfig({
       },
     }),
   ],
-});
+}));
