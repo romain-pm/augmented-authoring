@@ -10,7 +10,8 @@
     },
     "modal": {
       "label": "Suche",
-      "title": "In {{site}} suchen",
+      "title": "Willkommen bei kFind",
+      "siteInfo": "Suche in {{site}}, {{language}}",
       "hint": "Strg+K oder ⌘K zum Öffnen. Esc zum Schließen. Mit Pfeiltasten oder Tab navigieren. Enter zum Aufrufen. e zum Bearbeiten."
     },
     "empty": {
@@ -21,8 +22,17 @@
       "title": "Keine Ergebnisse.",
       "hint": "Keine Treffer für \"{{q}}\". Versuchen Sie andere Begriffe oder prüfen Sie die Schreibweise."
     },
-    "content": {
-      "title": "Seiten, Inhalte und Dokumente in {{site}}, auf {{language}}"
+    "jcrMedia": {
+      "title": "Medien"
+    },
+    "augmented": {
+      "title": "Seiten, Hauptressourcen und Dokumente"
+    },
+    "jcrPages": {
+      "title": "Seiten"
+    },
+    "jcrMainResources": {
+      "title": "Hauptressource (ganzseitiger Inhalt)"
     },
     "features": {
       "title": "Funktionen",

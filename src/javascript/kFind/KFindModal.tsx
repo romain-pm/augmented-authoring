@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApolloProvider } from "@apollo/client";
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Typography,
-} from "@jahia/moonstone";
+import { Modal, ModalFooter, Typography } from "@jahia/moonstone";
 import { KFindPanel } from "./KFindPanel.tsx";
 import { getApolloClient, onApolloClientReady } from "./apolloClientBridge.ts";
-import { getSiteKey } from "./shared/searchUtils.ts";
 
 export const KFindModal = () => {
   const { t } = useTranslation();
@@ -56,7 +49,10 @@ export const KFindModal = () => {
 
   return (
     <ApolloProvider client={apolloClient}>
-      <style>{`.search-modal.moonstone-modal { top: 48px; bottom: 48px; height: auto; max-height: none; }`}</style>
+      <style>{`
+        .search-modal.moonstone-modal { top: 48px; bottom: 48px; height: auto; max-height: none; }
+        .search-modal .moonstone-modal_body { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+      `}</style>
       <Modal
         isOpen={isOpen}
         onOpenChange={setIsOpen}
@@ -65,36 +61,34 @@ export const KFindModal = () => {
         style={{ width: "800px" }}
       >
         <>
-          <div style={{ position: "relative" }}>
-            <ModalHeader
-              title={t("search.modal.title", "Search in {{site}}", {
-                site: getSiteKey(),
-              })}
-            />
-            <Typography
-              variant="caption"
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              overflow: "hidden",
+            }}
+          >
+            <KFindPanel focusOnField onNavigate={() => setIsOpen(false)} />
+          </div>
+          <ModalFooter>
+            <div
               style={{
-                position: "absolute",
-                top: "50%",
-                right: "48px",
-                transform: "translateY(-50%)",
-                opacity: 0.4,
-                pointerEvents: "none",
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
               }}
             >
-              {new Date(__BUILD_TIME__).toLocaleString()}
-            </Typography>
-          </div>
-          <ModalBody>
-            <KFindPanel focusOnField onNavigate={() => setIsOpen(false)} />
-          </ModalBody>
-          <ModalFooter>
-            <Typography variant="caption">
-              {t(
-                "search.modal.hint",
-                "Press Ctrl+K or ⌘K to open · Esc to close · ↑↓ navigate · Enter to go · E to edit",
-              )}
-            </Typography>
+              <Typography variant="caption">
+                {t(
+                  "search.modal.hint",
+                  "Press Ctrl+K or ⌘K to open · Esc to close · ↑↓ navigate · Enter to go · E to edit",
+                )}
+              </Typography>
+              <Typography variant="caption" style={{ opacity: 0.4 }}>
+                {new Date(__BUILD_TIME__).toLocaleString()}
+              </Typography>
+            </div>
           </ModalFooter>
         </>
       </Modal>

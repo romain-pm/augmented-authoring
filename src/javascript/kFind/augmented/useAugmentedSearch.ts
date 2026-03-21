@@ -1,6 +1,6 @@
 import { useLazyQuery } from "@apollo/client";
 import { useRef, useState } from "react";
-import { SEARCH_QUERY } from "./augmentedFindQuery.ts";
+import { SEARCH_QUERY } from "./augmentedSearchQuery.ts";
 import type { SearchHit, ContentSearchDriver } from "../shared/searchTypes.ts";
 import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
 

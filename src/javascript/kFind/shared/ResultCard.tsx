@@ -8,45 +8,49 @@ import {
   Typography,
 } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import type { SearchHit } from "./searchTypes.ts";
-import { locateInJContent, sanitizeHtml } from "./searchUtils.ts";
+import { sanitizeHtml } from "./searchUtils.ts";
 import s from "./ResultCard.module.css";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const editNode = (path: string) =>
-  (window.parent as any).CE_API?.edit({ path });
 
 const MAX_NAME_LENGTH = 80;
 
 type ResultCardProps = {
-  hit: SearchHit;
-  onNavigate?: () => void;
+  title: string;
+  type: string;
+  path: string;
+  excerpt?: string | null;
+  /** Called when the row is clicked or Enter is pressed. */
+  onAction: () => void;
+  /** Optional secondary action button (e.g. edit). Hidden by default, shown on hover. */
+  onSecondaryAction?: () => void;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
   inputWrapperRef: React.RefObject<HTMLDivElement>;
 };
 
 export const ResultCard = ({
-  hit,
-  onNavigate,
+  title,
+  type,
+  path,
+  excerpt,
+  onAction,
+  onSecondaryAction,
   scrollContainerRef,
   inputWrapperRef,
 }: ResultCardProps) => {
   const { t } = useTranslation();
 
-  const displayableName =
-    hit.displayableName.length > MAX_NAME_LENGTH
-      ? hit.displayableName.slice(0, MAX_NAME_LENGTH) + "…"
-      : hit.displayableName;
+  const displayTitle =
+    title.length > MAX_NAME_LENGTH
+      ? title.slice(0, MAX_NAME_LENGTH) + "…"
+      : title;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      locateInJContent(hit.path);
-      onNavigate?.();
+      onAction();
       return;
     }
-    if (e.key === "e" || e.key === "E") {
+    if (onSecondaryAction && (e.key === "e" || e.key === "E")) {
       e.preventDefault();
-      editNode(hit.path);
+      onSecondaryAction();
       return;
     }
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -59,7 +63,6 @@ export const ResultCard = ({
       const idx = rows.indexOf(e.currentTarget as HTMLElement);
       const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
       if (next >= 0 && next < rows.length) rows[next].focus();
-      // ArrowUp on the first row returns focus to the search input.
       else if (next < 0)
         inputWrapperRef.current?.querySelector<HTMLElement>("input")?.focus();
     }
@@ -67,43 +70,42 @@ export const ResultCard = ({
 
   return (
     <TableRow
-      className={s.resultRow}
-      onClick={() => {
-        locateInJContent(hit.path);
-        onNavigate?.();
-      }}
+      className={excerpt ? s.resultRow : s.resultRowCompact}
+      onClick={onAction}
       onKeyDown={handleKeyDown}
     >
       <div className={s.resultRowContent}>
         <div className={s.resultRowInfo}>
-          <Typography variant="subHeading">{displayableName}</Typography>
+          <Typography variant="subHeading">{displayTitle}</Typography>
           <div className={s.resultRowMeta}>
-            <Chip color="accent" label={hit.nodeType} />
-            <Typography variant="caption">{hit.path}</Typography>
+            <Chip color="accent" label={type} />
+            <Typography variant="caption">{path}</Typography>
           </div>
-          {hit.excerpt && (
+          {excerpt && (
             <Typography variant="caption" className={s.resultRowExcerpt}>
               <span
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(hit.excerpt) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(excerpt) }}
               />
             </Typography>
           )}
         </div>
 
-        <div className={s.resultRowAction}>
-          <Tooltip label={t("search.action.edit", "Edit")}>
-            <Button
-              size="big"
-              variant="ghost"
-              icon={<Edit width={24} height={24} />}
-              tabIndex={-1}
-              onClick={(e) => {
-                e.stopPropagation();
-                editNode(hit.path);
-              }}
-            />
-          </Tooltip>
-        </div>
+        {onSecondaryAction && (
+          <div className={s.resultRowAction}>
+            <Tooltip label={t("search.action.edit", "Edit")}>
+              <Button
+                size="big"
+                variant="ghost"
+                icon={<Edit width={24} height={24} />}
+                tabIndex={-1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSecondaryAction();
+                }}
+              />
+            </Tooltip>
+          </div>
+        )}
       </div>
     </TableRow>
   );

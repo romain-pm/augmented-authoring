@@ -3,6 +3,11 @@
   cursor: pointer;
 }
 
+.resultRowCompact {
+  height: 56px;
+  cursor: pointer;
+}
+
 .resultRowContent {
   display: flex;
   align-items: center;

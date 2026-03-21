@@ -1,13 +1,17 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { FeatureHit } from "../shared/searchTypes.ts";
-import { getSiteKey, getSearchLanguage } from "../shared/searchUtils.ts";
+import {
+  getSiteKey,
+  getSearchLanguage,
+  getMinSearchChars,
+} from "../shared/searchUtils.ts";
 
 export function useFeatureSearch(query: string): FeatureHit[] {
   const { t } = useTranslation();
   return useMemo(() => {
     const trimmed = query.trim().toLowerCase();
-    if (trimmed.length < 2) return [];
+    if (trimmed.length < getMinSearchChars()) return [];
 
     const registry = window.jahia?.uiExtender?.registry?.registry;
     if (!registry) return [];

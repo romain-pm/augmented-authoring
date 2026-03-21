@@ -11,7 +11,8 @@
     "/^sh deploy\\.sh$/": {
       "approve": true,
       "matchCommandLine": true
-    }
+    },
+    "npx tsc": true
   },
   "i18n-ally.keystyle": "nested"
 }

@@ -10,7 +10,8 @@
     },
     "modal": {
       "label": "Search",
-      "title": "Search in {{site}}",
+      "title": "Welcome to kFind",
+      "siteInfo": "Searching in {{site}}, {{language}}",
       "hint": "Press Ctrl+K or ⌘K to open me. Esc to close. Navigate with arrows or tabs. Enter to go to. e for edit."
     },
     "empty": {
@@ -21,8 +22,17 @@
       "title": "No results.",
       "hint": "Nothing matched \"{{q}}\". Try different keywords or check for typos."
     },
-    "content": {
-      "title": "Pages, content and documents in {{site}}, in {{language}}"
+    "jcrMedia": {
+      "title": "Media"
+    },
+    "augmented": {
+      "title": "Pages, main resources, and documents"
+    },
+    "jcrPages": {
+      "title": "Pages"
+    },
+    "jcrMainResources": {
+      "title": "Main Resource (Full page content)"
     },
     "features": {
       "title": "Features",

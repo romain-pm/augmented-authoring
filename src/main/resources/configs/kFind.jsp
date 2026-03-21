@@ -11,7 +11,15 @@
             minSearchChars:${kfindConfig['minSearchChars']},
             defaultDisplayedResults:${kfindConfig['defaultDisplayedResults']},
             augmentedFindDelayInTypingToLaunchSearch:${kfindConfig['augmentedFindDelayInTypingToLaunchSearch']},
-            jcrFindDelayInTypingToLaunchSearch:${kfindConfig['jcrFindDelayInTypingToLaunchSearch']}
+            jcrFindDelayInTypingToLaunchSearch:${kfindConfig['jcrFindDelayInTypingToLaunchSearch']},
+            uiFeaturesEnabled:${kfindConfig['uiFeaturesEnabled']},
+            uiFeaturesMaxResults:${kfindConfig['uiFeaturesMaxResults']},
+            jcrMediaEnabled:${kfindConfig['jcrMediaEnabled']},
+            jcrMediaMaxResults:${kfindConfig['jcrMediaMaxResults']},
+            jcrPagesEnabled:${kfindConfig['jcrPagesEnabled']},
+            jcrPagesMaxResults:${kfindConfig['jcrPagesMaxResults']},
+            jcrMainResourcesEnabled:${kfindConfig['jcrMainResourcesEnabled']},
+            jcrMainResourcesMaxResults:${kfindConfig['jcrMainResourcesMaxResults']}
         }
         console.debug("%c kFind config is added to contextJsParameters", "color: #3c8cba");
     </c:when>

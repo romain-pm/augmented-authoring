@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
-import type { SearchHit } from "../shared/searchTypes.ts";
+import type { SearchHit } from "../../shared/searchTypes.ts";
 
 export const JCR_SEARCH_QUERY = gql`
   query JCRSearch($query: String!, $limit: Int!, $offset: Int!) {
-    jcr {
+    jcr(workspace: EDIT) {
       nodesByQuery(query: $query, limit: $limit, offset: $offset) {
         edges {
           node {
@@ -11,6 +11,7 @@ export const JCR_SEARCH_QUERY = gql`
             name
             path
             uuid
+            workspace
             primaryNodeType {
               name
             }
@@ -46,6 +47,7 @@ export const JCR_NODES_BY_CRITERIA_QUERY = gql`
           name
           path
           uuid
+          workspace
           primaryNodeType {
             name
           }
@@ -71,7 +73,7 @@ export function escapeJcrSql2(value: string): string {
 export function buildJcrSql2(searchTerm: string, sitePath: string): string {
   const escapedTerm = escapeJcrSql2(searchTerm);
   const escapedPath = escapeJcrSql2(sitePath);
-  return `SELECT * FROM [nt:base] as node WHERE (node.[jcr:primaryType] = 'jnt:page' or node.[jcr:mixinTypes] = 'jmix:mainResource') AND ISDESCENDANTNODE(node, '${escapedPath}') AND contains(node.*, '${escapedTerm}') ORDER BY node.[j:lastModified] DESC`;
+  return `SELECT * FROM [jnt:page] as node WHERE ISDESCENDANTNODE(node, '${escapedPath}') AND contains(node.*, '${escapedTerm}') ORDER BY node.[j:lastModified] DESC`;
 }
 
 export function buildNodesByCriteriaVariables(

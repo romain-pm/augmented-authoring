@@ -63,6 +63,42 @@ export function getJcrFindDelay(): number {
   );
 }
 
+export function getJcrQueryType(): "nodesByQuery" | "nodesByCriteria" {
+  return window.contextJsParameters.kFind?.typeOfJCRGraphQL ?? "nodesByQuery";
+}
+
+export function isUiFeaturesEnabled(): boolean {
+  return window.contextJsParameters.kFind?.uiFeaturesEnabled !== false;
+}
+
+export function getUiFeaturesMaxResults(): number {
+  return window.contextJsParameters.kFind?.uiFeaturesMaxResults ?? 2;
+}
+
+export function isJcrMediaEnabled(): boolean {
+  return window.contextJsParameters.kFind?.jcrMediaEnabled !== false;
+}
+
+export function getJcrMediaMaxResults(): number {
+  return window.contextJsParameters.kFind?.jcrMediaMaxResults ?? 2;
+}
+
+export function isJcrPagesEnabled(): boolean {
+  return window.contextJsParameters.kFind?.jcrPagesEnabled !== false;
+}
+
+export function getJcrPagesMaxResults(): number {
+  return window.contextJsParameters.kFind?.jcrPagesMaxResults ?? 4;
+}
+
+export function isJcrMainResourcesEnabled(): boolean {
+  return window.contextJsParameters.kFind?.jcrMainResourcesEnabled !== false;
+}
+
+export function getJcrMainResourcesMaxResults(): number {
+  return window.contextJsParameters.kFind?.jcrMainResourcesMaxResults ?? 4;
+}
+
 /**
  * Navigates the parent jContent SPA to the given node path by pushing a new
  * URL into its history and firing a synthetic popstate so React Router picks

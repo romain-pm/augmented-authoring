@@ -15,6 +15,22 @@ declare interface Window {
       augmentedFindDelayInTypingToLaunchSearch?: number;
       /** Debounce delay (ms) before firing a search when augmented search is NOT enabled (JCR fallback). Default: 300. */
       jcrFindDelayInTypingToLaunchSearch?: number;
+      /** Whether the UI features table is enabled. Default: true. */
+      uiFeaturesEnabled?: boolean;
+      /** Max results shown in the UI features table. Default: 2. */
+      uiFeaturesMaxResults?: number;
+      /** Whether the JCR media table is enabled. Default: true. */
+      jcrMediaEnabled?: boolean;
+      /** Max results shown in the JCR media table. Default: 2. */
+      jcrMediaMaxResults?: number;
+      /** Whether the JCR pages table is enabled. Default: true. */
+      jcrPagesEnabled?: boolean;
+      /** Max results shown in the JCR pages table. Default: 4. */
+      jcrPagesMaxResults?: number;
+      /** Whether the JCR main resources table is enabled. Default: true. */
+      jcrMainResourcesEnabled?: boolean;
+      /** Max results shown in the JCR main resources table. Default: 4. */
+      jcrMainResourcesMaxResults?: number;
     };
     [key: string]: unknown;
   };

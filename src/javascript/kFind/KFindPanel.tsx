@@ -1,9 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Input, Search } from "@jahia/moonstone";
+import React, { useRef, useState } from "react";
+import { Close, EmptyData, Search } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import { useContentSearch } from "./shared/useContentSearch.ts";
-import { useFeatureSearch } from "./featuresFind/useFeatureSearch.ts";
-import { SearchResultsView } from "./shared/SearchResultsView.tsx";
+import { KFindHeader } from "./KFindHeader.tsx";
+import { useSearchOrchestration } from "./shared/useSearchOrchestration.ts";
+import { FeatureResults } from "./features/FeatureResults.tsx";
+import { ContentResultsSection } from "./shared/ContentResultsSection.tsx";
+import {
+  getMinSearchChars,
+  getDefaultDisplayedResults,
+  isUiFeaturesEnabled,
+  isJcrMediaEnabled,
+  getJcrMediaMaxResults,
+  isJcrPagesEnabled,
+  getJcrPagesMaxResults,
+  isJcrMainResourcesEnabled,
+  getJcrMainResourcesMaxResults,
+} from "./shared/searchUtils.ts";
+import styles from "./shared/layout.module.css";
 
 type KFindPanelProps = {
   focusOnField?: boolean;
@@ -13,88 +26,186 @@ type KFindPanelProps = {
 export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState("");
-  const inputWrapperRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
 
   const {
-    hits,
-    totalHits,
-    loading,
-    hasMore,
-    currentQueryRef,
+    isAugmented,
+    featureHits,
+    augmented,
+    jcrMedia,
+    jcrPages,
+    jcrMainResources,
+    currentQuery,
     triggerSearch,
-    loadNextPage,
-  } = useContentSearch(searchValue);
-
-  const featureHits = useFeatureSearch(searchValue);
-
-  // Keep the moonstone clear button out of the tab order — moonstone doesn't
-  // expose a prop for this, so we patch it via a MutationObserver that fires
-  // whenever the button is added to (or removed from) the DOM.
-  useEffect(() => {
-    const wrapper = inputWrapperRef.current;
-    if (!wrapper) return;
-    const patch = () => {
-      wrapper
-        .querySelectorAll<HTMLElement>(".moonstone-baseInput_clearButton")
-        .forEach((el) => {
-          el.tabIndex = -1;
-        });
-    };
-    patch();
-    const observer = new MutationObserver(patch);
-    observer.observe(wrapper, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, []);
+  } = useSearchOrchestration(searchValue);
 
   const trimmedQuery = searchValue.trim();
+  const minChars = getMinSearchChars();
+
+  // Check whether any visible section is still loading or has results,
+  // so we can show a single global "no results" message instead of per-section ones.
+  const isAnyContentLoading =
+    (isJcrMediaEnabled() && jcrMedia.driver.loading) ||
+    (isAugmented && augmented.driver.loading) ||
+    (!isAugmented && isJcrPagesEnabled() && jcrPages.driver.loading) ||
+    (!isAugmented &&
+      isJcrMainResourcesEnabled() &&
+      jcrMainResources.driver.loading);
+
+  const hasAnyResults =
+    (isUiFeaturesEnabled() && featureHits.length > 0) ||
+    (isJcrMediaEnabled() && jcrMedia.driver.hits.length > 0) ||
+    (isAugmented && augmented.driver.hits.length > 0) ||
+    (!isAugmented && isJcrPagesEnabled() && jcrPages.driver.hits.length > 0) ||
+    (!isAugmented &&
+      isJcrMainResourcesEnabled() &&
+      jcrMainResources.driver.hits.length > 0);
+
+  const showGlobalNoResults =
+    trimmedQuery.length >= minChars &&
+    currentQuery === trimmedQuery &&
+    !isAnyContentLoading &&
+    !hasAnyResults;
 
   return (
-    // Outer flex column — fills the full height of the ModalBody
-    <div>
-      {/* ── Search input ── */}
-      <div style={{ marginBottom: "16px" }}>
-        <div ref={inputWrapperRef}>
-          <Input
-            size="big"
-            placeholder={t("search.placeholder", "Search…")}
-            value={searchValue}
-            icon={<Search />}
-            focusOnField={focusOnField}
-            onChange={(e) => {
-              setSearchValue(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowDown") {
-                e.preventDefault();
-                const first =
-                  scrollContainerRef.current?.querySelector<HTMLElement>(
-                    ".moonstone-tableRow[tabindex]",
-                  );
-                first?.focus();
-              }
-            }}
-            onKeyUp={(e) => {
-              if (e.key === "Enter") triggerSearch(searchValue);
-            }}
-            onClear={() => setSearchValue("")}
-          />
-        </div>
-      </div>
-
-      <SearchResultsView
-        trimmedQuery={trimmedQuery}
-        loading={loading}
-        hits={hits}
-        totalHits={totalHits}
-        hasMore={hasMore}
-        featureHits={featureHits}
-        currentQuery={currentQueryRef.current}
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        overflow: "hidden",
+      }}
+    >
+      <KFindHeader
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        onSearchClear={() => setSearchValue("")}
+        onTriggerSearch={triggerSearch}
+        focusOnField={focusOnField}
         scrollContainerRef={scrollContainerRef}
-        inputWrapperRef={inputWrapperRef}
-        onNavigate={onNavigate}
-        onLoadMore={loadNextPage}
       />
+
+      <div ref={scrollContainerRef} className={styles.scrollContainer}>
+        {/* ── Empty state ── */}
+        {trimmedQuery.length < minChars && featureHits.length === 0 && (
+          <EmptyData
+            icon={<Search size="big" />}
+            title={t("search.empty.title", "Find anything.")}
+            message={t(
+              "search.empty.hint",
+              "Pages, content, documents — just start typing ({{min}} chars min).",
+              { min: minChars },
+            )}
+          />
+        )}
+
+        {/* ── 1. UI Features (always, if enabled) ── */}
+        {isUiFeaturesEnabled() && (
+          <FeatureResults
+            trimmedQuery={trimmedQuery}
+            featureHits={featureHits}
+            onNavigate={onNavigate}
+            scrollContainerRef={scrollContainerRef}
+            inputWrapperRef={inputWrapperRef}
+          />
+        )}
+
+        {/* ── 2. JCR Media (always, if enabled) ── */}
+        {isJcrMediaEnabled() && trimmedQuery.length >= minChars && (
+          <ContentResultsSection
+            title={t("search.jcrMedia.title", "Media")}
+            hits={jcrMedia.driver.hits}
+            totalHits={jcrMedia.driver.totalHits}
+            loading={jcrMedia.driver.loading}
+            hasMore={jcrMedia.driver.hasMore}
+            maxResults={getJcrMediaMaxResults()}
+            trimmedQuery={trimmedQuery}
+            currentQuery={currentQuery}
+            scrollContainerRef={scrollContainerRef}
+            inputWrapperRef={inputWrapperRef}
+            onNavigate={onNavigate}
+            onLoadMore={jcrMedia.loadNextPage}
+          />
+        )}
+
+        {/* ── 3. Augmented search (only when augmented search is available) ── */}
+        {isAugmented && trimmedQuery.length >= minChars && (
+          <ContentResultsSection
+            title={t(
+              "search.augmented.title",
+              "Pages, main resources, and documents",
+            )}
+            hits={augmented.driver.hits}
+            totalHits={augmented.driver.totalHits}
+            loading={augmented.driver.loading}
+            hasMore={augmented.driver.hasMore}
+            maxResults={getDefaultDisplayedResults()}
+            trimmedQuery={trimmedQuery}
+            currentQuery={currentQuery}
+            scrollContainerRef={scrollContainerRef}
+            inputWrapperRef={inputWrapperRef}
+            onNavigate={onNavigate}
+            onLoadMore={augmented.loadNextPage}
+          />
+        )}
+
+        {/* ── 4. JCR Pages (only when augmented is NOT available) ── */}
+        {!isAugmented &&
+          isJcrPagesEnabled() &&
+          trimmedQuery.length >= minChars && (
+            <ContentResultsSection
+              title={t("search.jcrPages.title", "Pages")}
+              hits={jcrPages.driver.hits}
+              totalHits={jcrPages.driver.totalHits}
+              loading={jcrPages.driver.loading}
+              hasMore={jcrPages.driver.hasMore}
+              maxResults={getJcrPagesMaxResults()}
+              trimmedQuery={trimmedQuery}
+              currentQuery={currentQuery}
+              scrollContainerRef={scrollContainerRef}
+              inputWrapperRef={inputWrapperRef}
+              onNavigate={onNavigate}
+              onLoadMore={jcrPages.loadNextPage}
+            />
+          )}
+
+        {/* ── 5. JCR Main Resources (only when augmented is NOT available) ── */}
+        {!isAugmented &&
+          isJcrMainResourcesEnabled() &&
+          trimmedQuery.length >= minChars && (
+            <ContentResultsSection
+              title={t(
+                "search.jcrMainResources.title",
+                "Main Resource (Full page content)",
+              )}
+              hits={jcrMainResources.driver.hits}
+              totalHits={jcrMainResources.driver.totalHits}
+              loading={jcrMainResources.driver.loading}
+              hasMore={jcrMainResources.driver.hasMore}
+              maxResults={getJcrMainResourcesMaxResults()}
+              trimmedQuery={trimmedQuery}
+              currentQuery={currentQuery}
+              scrollContainerRef={scrollContainerRef}
+              inputWrapperRef={inputWrapperRef}
+              onNavigate={onNavigate}
+              onLoadMore={jcrMainResources.loadNextPage}
+            />
+          )}
+
+        {/* ── Global "no results" — shown only when every visible section is empty ── */}
+        {showGlobalNoResults && (
+          <EmptyData
+            icon={<Close />}
+            title={t("search.noResults.title", "No results.")}
+            message={t(
+              "search.noResults.hint",
+              'Nothing matched "{{q}}". Try different keywords or check for typos.',
+              { q: trimmedQuery },
+            )}
+          />
+        )}
+      </div>
     </div>
   );
 };
