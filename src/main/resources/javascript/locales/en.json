@@ -4,7 +4,7 @@
     "placeholder": "Search…",
     "loading": "Searching…",
     "loadingMore": "Loading more…",
-    "showMore": "Show {{count}} more",
+    "showMore": "Show more",
     "action": {
       "edit": "Edit"
     },
@@ -16,7 +16,7 @@
     },
     "empty": {
       "title": "Find anything.",
-      "hint": "Features, Pages, Full Page contents, Media, Documents - just start typing ({{min}} chars min)."
+      "hint": "Features, Pages, Full Page contents, Media, Documents - Just start typing ({{min}} chars min)."
     },
     "noResults": {
       "title": "No results.",

@@ -51,11 +51,6 @@ export const FeatureResults = memo(
 
     const visibleFeatureHits = featureHits.slice(0, displayedCount);
     const hasMoreFeatures = displayedCount < featureHits.length;
-    // Number of items that will become visible on next click (1–10).
-    const nextFeatureBatchCount = Math.min(
-      getUiFeaturesMaxResults(),
-      featureHits.length - displayedCount,
-    );
 
     const renderFeatureRow = useCallback(
       (row: Row<FeatureHit>) => {
@@ -93,7 +88,7 @@ export const FeatureResults = memo(
     if (featureHits.length === 0) return null;
 
     return (
-      <>
+      <div className={hideTableHead.section}>
         <Typography variant="heading">
           {t("search.features.title", "Features")}
         </Typography>
@@ -106,16 +101,13 @@ export const FeatureResults = memo(
         />
         {hasMoreFeatures && (
           <Button
+            className={hideTableHead.showMoreButton}
             variant="ghost"
-            label={t("search.showMore", "Show {{count}} more", {
-              count: nextFeatureBatchCount,
-            })}
-            onClick={() =>
-              setDisplayedCount((c) => c + getUiFeaturesMaxResults())
-            }
+            label={t("search.showMore", "Show more")}
+            onClick={() => setDisplayedCount((c) => c + 10)}
           />
         )}
-      </>
+      </div>
     );
   },
 );

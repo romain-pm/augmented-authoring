@@ -4,7 +4,7 @@
     "placeholder": "Rechercher…",
     "loading": "Recherche en cours…",
     "loadingMore": "Chargement…",
-    "showMore": "Voir {{count}} de plus",
+    "showMore": "Voir plus",
     "action": {
       "edit": "Modifier"
     },

@@ -1,3 +1,7 @@
 .resultsTable :global(.moonstone-tableHead) {
   display: none;
 }
+
+.showMoreButton {
+  width: 100%;
+}

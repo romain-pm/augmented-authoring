@@ -12,7 +12,7 @@
  * A global "no results" empty state is shown when all visible sections
  * return empty after a completed query.
  */
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Close, EmptyData, Search } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
 import { KFindHeader } from "./KFindHeader.tsx";
@@ -31,6 +31,7 @@ import {
   getJcrMainResourcesMaxResults,
 } from "./shared/searchUtils.ts";
 import styles from "./shared/layout.module.css";
+import s from "./KFindPanel.module.css";
 
 type KFindPanelProps = {
   focusOnField?: boolean;
@@ -82,22 +83,18 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
     !isAnyContentLoading &&
     !hasAnyResults;
 
+  const handleSearchClear = useCallback(() => setSearchValue(""), []);
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        overflow: "hidden",
-      }}
-    >
+    <div className={s.panel}>
       <KFindHeader
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        onSearchClear={() => setSearchValue("")}
+        onSearchClear={handleSearchClear}
         onTriggerSearch={triggerSearch}
         focusOnField={focusOnField}
         scrollContainerRef={scrollContainerRef}
+        inputWrapperRef={inputWrapperRef}
       />
 
       <div ref={scrollContainerRef} className={styles.scrollContainer}>
@@ -106,11 +103,7 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
           <EmptyData
             icon={<Search size="big" />}
             title={t("search.empty.title", "Find anything.")}
-            message={t(
-              "search.empty.hint",
-              "Pages, content, documents — just start typing ({{min}} chars min).",
-              { min: minChars },
-            )}
+            message={t("search.empty.hint", { min: minChars })}
           />
         )}
 
@@ -130,12 +123,10 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
           <ContentResultsSection
             title={t("search.jcrMedia.title", "Media")}
             hits={jcrMedia.driver.hits}
-            totalHits={jcrMedia.driver.totalHits}
             loading={jcrMedia.driver.loading}
             hasMore={jcrMedia.driver.hasMore}
             maxResults={getJcrMediaMaxResults()}
             trimmedQuery={trimmedQuery}
-            currentQuery={currentQuery}
             scrollContainerRef={scrollContainerRef}
             inputWrapperRef={inputWrapperRef}
             onNavigate={onNavigate}
@@ -151,12 +142,10 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
               "Pages, main resources, and documents",
             )}
             hits={augmented.driver.hits}
-            totalHits={augmented.driver.totalHits}
             loading={augmented.driver.loading}
             hasMore={augmented.driver.hasMore}
             maxResults={getDefaultDisplayedResults()}
             trimmedQuery={trimmedQuery}
-            currentQuery={currentQuery}
             scrollContainerRef={scrollContainerRef}
             inputWrapperRef={inputWrapperRef}
             onNavigate={onNavigate}
@@ -171,12 +160,10 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
             <ContentResultsSection
               title={t("search.jcrPages.title", "Pages")}
               hits={jcrPages.driver.hits}
-              totalHits={jcrPages.driver.totalHits}
               loading={jcrPages.driver.loading}
               hasMore={jcrPages.driver.hasMore}
               maxResults={getJcrPagesMaxResults()}
               trimmedQuery={trimmedQuery}
-              currentQuery={currentQuery}
               scrollContainerRef={scrollContainerRef}
               inputWrapperRef={inputWrapperRef}
               onNavigate={onNavigate}
@@ -194,12 +181,10 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
                 "Main Resource (Full page content)",
               )}
               hits={jcrMainResources.driver.hits}
-              totalHits={jcrMainResources.driver.totalHits}
               loading={jcrMainResources.driver.loading}
               hasMore={jcrMainResources.driver.hasMore}
               maxResults={getJcrMainResourcesMaxResults()}
               trimmedQuery={trimmedQuery}
-              currentQuery={currentQuery}
               scrollContainerRef={scrollContainerRef}
               inputWrapperRef={inputWrapperRef}
               onNavigate={onNavigate}

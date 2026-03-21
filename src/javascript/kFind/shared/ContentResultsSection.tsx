@@ -13,31 +13,26 @@
  * server-side page fetch in the orchestration layer.
  */
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Button,
-  DataTable,
-  EmptyData,
-  Loader,
-  Typography,
-} from "@jahia/moonstone";
+import { Button, DataTable, Typography } from "@jahia/moonstone";
 import type { Row } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
 import { ResultCard } from "./ResultCard.tsx";
 import type { SearchHit } from "./searchTypes.ts";
 import { locateInJContent } from "./searchUtils.ts";
 import hideTableHead from "./hideTableHead.module.css";
+import s from "./ContentResultsSection.module.css";
+
+const editNode = (path: string) => window.parent.CE_API?.edit({ path });
 
 const contentColumns = [{ key: "displayableName" as const, label: "" }];
 
 type ContentResultsSectionProps = {
   title: string;
   hits: SearchHit[];
-  totalHits: number;
   loading: boolean;
   hasMore: boolean;
   maxResults: number;
   trimmedQuery: string;
-  currentQuery: string;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
   inputWrapperRef: React.RefObject<HTMLDivElement>;
   onNavigate?: () => void;
@@ -47,12 +42,10 @@ type ContentResultsSectionProps = {
 export const ContentResultsSection = ({
   title,
   hits,
-  totalHits,
   loading,
   hasMore,
   maxResults,
   trimmedQuery,
-  currentQuery,
   scrollContainerRef,
   inputWrapperRef,
   onNavigate,
@@ -68,26 +61,13 @@ export const ContentResultsSection = ({
   const visibleHits = hits.slice(0, displayedCount);
   const hasMoreToShow = displayedCount < hits.length || hasMore;
 
-  // How many items will become visible on the next "show more" click:
-  // - If there are locally buffered items left, show at most maxResults of them.
-  // - If the local buffer is exhausted but the server has more, the next fetch
-  //   will return up to maxResults items, so show that as the expected count.
-  const nextBatchCount =
-    hits.length > displayedCount
-      ? Math.min(maxResults, hits.length - displayedCount)
-      : maxResults;
-
   const handleShowMore = () => {
-    const newCount = displayedCount + maxResults;
+    const newCount = displayedCount + 10;
     setDisplayedCount(newCount);
     if (newCount >= hits.length && hasMore) {
       onLoadMore();
     }
   };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const editNode = (path: string) =>
-    (window.parent as any).CE_API?.edit({ path });
 
   const renderContentRow = useCallback(
     (row: Row<SearchHit>) => {
@@ -116,14 +96,13 @@ export const ContentResultsSection = ({
   if (hits.length === 0 && !loading) return null;
 
   return (
-    <div>
+    <div className={`${hideTableHead.section} ${s.section}`}>
       <Typography variant="heading">{title}</Typography>
 
       {loading && hits.length === 0 && (
-        <EmptyData
-          icon={<Loader />}
-          message={t("search.loading", "Searching…")}
-        />
+        <Typography variant="body">
+          {t("search.loading", "Searching…")}
+        </Typography>
       )}
 
       {visibleHits.length > 0 && (
@@ -144,10 +123,9 @@ export const ContentResultsSection = ({
 
       {!loading && hasMoreToShow && hits.length > 0 && (
         <Button
+          className={hideTableHead.showMoreButton}
           variant="ghost"
-          label={t("search.showMore", "Show {{count}} more", {
-            count: nextBatchCount,
-          })}
+          label={t("search.showMore", "Show more")}
           onClick={handleShowMore}
         />
       )}

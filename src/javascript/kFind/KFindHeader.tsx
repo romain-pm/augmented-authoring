@@ -13,10 +13,11 @@
  * a MutationObserver patches its tabIndex to −1 so it doesn't interfere
  * with the arrow-key navigation flow.
  */
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { Input, Search, Typography } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
 import { getSiteKey, getSearchLanguage } from "./shared/searchUtils.ts";
+import s from "./KFindHeader.module.css";
 
 type KFindHeaderProps = {
   searchValue: string;
@@ -25,6 +26,7 @@ type KFindHeaderProps = {
   onTriggerSearch: (value: string) => void;
   focusOnField?: boolean;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
+  inputWrapperRef: React.RefObject<HTMLDivElement>;
 };
 
 export const KFindHeader = ({
@@ -34,9 +36,9 @@ export const KFindHeader = ({
   onTriggerSearch,
   focusOnField,
   scrollContainerRef,
+  inputWrapperRef,
 }: KFindHeaderProps) => {
   const { t } = useTranslation();
-  const inputWrapperRef = useRef<HTMLDivElement>(null);
 
   // Keep the moonstone clear button out of the tab order.
   useEffect(() => {
@@ -56,26 +58,12 @@ export const KFindHeader = ({
   }, []);
 
   return (
-    <div
-      style={{
-        flexShrink: 0,
-        padding: "16px 16px 12px",
-        borderBottom: "1px solid var(--color-grey_20, #e0e0e0)",
-        background: "var(--color-light, #fff)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          marginBottom: "12px",
-        }}
-      >
+    <div className={s.header}>
+      <div className={s.titleRow}>
         <Typography variant="title">
           {t("search.modal.title", "Welcome to kFind")}
         </Typography>
-        <Typography variant="caption" style={{ opacity: 0.6 }}>
+        <Typography variant="caption" className={s.siteInfo}>
           {t("search.modal.siteInfo", "Searching in {{site}}, {{language}}", {
             site: getSiteKey(),
             language: getSearchLanguage(),

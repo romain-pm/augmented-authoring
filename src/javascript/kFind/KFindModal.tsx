@@ -63,7 +63,7 @@ export const KFindModal = () => {
   return (
     <ApolloProvider client={apolloClient}>
       <style>{`
-        .search-modal.moonstone-modal { top: 48px; bottom: 48px; height: auto; max-height: none; }
+        .search-modal.moonstone-modal { top: 32px; bottom: 32px; height: auto; max-height: none; }
         .search-modal .moonstone-modal_body { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
       `}</style>
       <Modal

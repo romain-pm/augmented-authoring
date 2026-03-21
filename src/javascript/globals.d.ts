@@ -34,6 +34,9 @@ declare interface Window {
     };
     [key: string]: unknown;
   };
+  CE_API?: {
+    edit: (opts: { path: string }) => void;
+  };
   jahia?: {
     routerHistory?: { push: (path: string) => void; [k: string]: unknown };
     uiExtender?: {
