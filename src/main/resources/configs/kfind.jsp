@@ -1,12 +1,12 @@
-<%@ page language="java" contentType="text/javascript" %>
+<%@ page language="java" contentType="text/javascript" import="java.util.Date" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="utility" uri="http://www.jahia.org/tags/utilityLib" %>
 <%@ taglib prefix="functions" uri="http://www.jahia.org/tags/functions" %>
-
+<% String buildTime = new Date().toString(); %>
 <c:set var="kfindConfig" value="${functions:getConfigValues('org.jahia.pm.modules.kfind')}"/>
 <c:choose>
     <c:when test="${! empty kfindConfig}">
-        contextJsParameters.kfind={
+        contextJsParameters.kfind={buildTime:"<%= buildTime %>",
             typeOfJCRGraphQL:"${kfindConfig['typeOfJCRGraphQL']}",
             minSearchChars:${kfindConfig['minSearchChars']},
             defaultDisplayedResults:${kfindConfig['defaultDisplayedResults']},
