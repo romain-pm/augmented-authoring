@@ -1,5 +1,5 @@
 {
-  "name": "kFind",
+  "name": "kfind",
   "private": true,
   "type": "module",
   "scripts": {
@@ -29,7 +29,7 @@
       "jahia": "javascript/apps/remoteEntry.js"
     },
     "apps": {
-      "jahia": "configs/kFind.jsp"
+      "jahia": "configs/kfind.jsp"
     },
     "urlPatterns": {
       "jahia": "/administration/(?<siteKey>\\S*?)/settings/(?<settingName>\\S*)"

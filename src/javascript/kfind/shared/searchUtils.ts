@@ -43,60 +43,60 @@ export function getSearchLanguage(): string {
 }
 
 export function getMinSearchChars(): number {
-  return window.contextJsParameters.kFind?.minSearchChars ?? 3;
+  return window.contextJsParameters.kfind?.minSearchChars ?? 3;
 }
 
 export function getDefaultDisplayedResults(): number {
-  return window.contextJsParameters.kFind?.defaultDisplayedResults ?? 5;
+  return window.contextJsParameters.kfind?.defaultDisplayedResults ?? 5;
 }
 
 export function getAugmentedFindDelay(): number {
   return (
-    window.contextJsParameters.kFind
+    window.contextJsParameters.kfind
       ?.augmentedFindDelayInTypingToLaunchSearch ?? 300
   );
 }
 
 export function getJcrFindDelay(): number {
   return (
-    window.contextJsParameters.kFind?.jcrFindDelayInTypingToLaunchSearch ?? 300
+    window.contextJsParameters.kfind?.jcrFindDelayInTypingToLaunchSearch ?? 300
   );
 }
 
 export function getJcrQueryType(): "nodesByQuery" | "nodesByCriteria" {
-  return window.contextJsParameters.kFind?.typeOfJCRGraphQL ?? "nodesByQuery";
+  return window.contextJsParameters.kfind?.typeOfJCRGraphQL ?? "nodesByQuery";
 }
 
 export function isUiFeaturesEnabled(): boolean {
-  return window.contextJsParameters.kFind?.uiFeaturesEnabled !== false;
+  return window.contextJsParameters.kfind?.uiFeaturesEnabled !== false;
 }
 
 export function getUiFeaturesMaxResults(): number {
-  return window.contextJsParameters.kFind?.uiFeaturesMaxResults ?? 2;
+  return window.contextJsParameters.kfind?.uiFeaturesMaxResults ?? 2;
 }
 
 export function isJcrMediaEnabled(): boolean {
-  return window.contextJsParameters.kFind?.jcrMediaEnabled !== false;
+  return window.contextJsParameters.kfind?.jcrMediaEnabled !== false;
 }
 
 export function getJcrMediaMaxResults(): number {
-  return window.contextJsParameters.kFind?.jcrMediaMaxResults ?? 2;
+  return window.contextJsParameters.kfind?.jcrMediaMaxResults ?? 2;
 }
 
 export function isJcrPagesEnabled(): boolean {
-  return window.contextJsParameters.kFind?.jcrPagesEnabled !== false;
+  return window.contextJsParameters.kfind?.jcrPagesEnabled !== false;
 }
 
 export function getJcrPagesMaxResults(): number {
-  return window.contextJsParameters.kFind?.jcrPagesMaxResults ?? 4;
+  return window.contextJsParameters.kfind?.jcrPagesMaxResults ?? 4;
 }
 
 export function isJcrMainResourcesEnabled(): boolean {
-  return window.contextJsParameters.kFind?.jcrMainResourcesEnabled !== false;
+  return window.contextJsParameters.kfind?.jcrMainResourcesEnabled !== false;
 }
 
 export function getJcrMainResourcesMaxResults(): number {
-  return window.contextJsParameters.kFind?.jcrMainResourcesMaxResults ?? 4;
+  return window.contextJsParameters.kfind?.jcrMainResourcesMaxResults ?? 4;
 }
 
 /**

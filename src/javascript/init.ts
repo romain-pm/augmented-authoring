@@ -11,7 +11,7 @@ import { registry } from "@jahia/ui-extender";
 import { registerRoutes } from "./kfind/routes.tsx";
 
 export default function () {
-  registry.add("callback", "kFind", {
+  registry.add("callback", "kfind", {
     targets: ["jahiaApp-init:2"],
     requireModuleInstalledOnSite: "kfind",
     callback: registerRoutes,

@@ -5,7 +5,7 @@ declare interface Window {
     lang?: string;
     siteKey?: string;
     /** Populated server-side by reading org.jahia.pm.modules.kfind.cfg */
-    kFind?: {
+    kfind?: {
       typeOfJCRGraphQL?: "nodesByQuery" | "nodesByCriteria";
       /** Minimum characters before a content search query is fired. Default: 3. */
       minSearchChars?: number;

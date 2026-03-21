@@ -1,5 +1,5 @@
 {
-  "label": "kFind",
+  "label": "kfind",
   "search": {
     "placeholder": "Search…",
     "loading": "Searching…",
@@ -10,7 +10,7 @@
     },
     "modal": {
       "label": "Search",
-      "title": "Welcome to kFind",
+      "title": "Welcome to kfind",
       "siteInfo": "Searching in {{site}}, {{language}}",
       "hint": "Press Ctrl+K or ⌘K to open me. Esc to close. Navigate with arrows or tabs. Enter to go to. e for edit."
     },

@@ -1,7 +1,7 @@
 /**
  * Root modal component for the kFind search dialog.
  *
- * - Opens/closes via Cmd+K / Ctrl+K / Escape or the `kFind:open-search` custom event.
+ * - Opens/closes via Cmd+K / Ctrl+K / Escape or the `kfind:open-search` custom event.
  * - Wraps the search panel in an ApolloProvider using jcontent's captured client.
  * - Footer displays keyboard hints and build timestamp.
  *
@@ -51,10 +51,10 @@ export const KFindModal = () => {
     }
 
     targets.forEach((t) => t.addEventListener("keydown", handleKeyDown));
-    window.addEventListener("kFind:open-search", handleOpenEvent);
+    window.addEventListener("kfind:open-search", handleOpenEvent);
     return () => {
       targets.forEach((t) => t.removeEventListener("keydown", handleKeyDown));
-      window.removeEventListener("kFind:open-search", handleOpenEvent);
+      window.removeEventListener("kfind:open-search", handleOpenEvent);
     };
   }, []);
 

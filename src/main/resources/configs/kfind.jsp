@@ -6,7 +6,7 @@
 <c:set var="kfindConfig" value="${functions:getConfigValues('org.jahia.pm.modules.kfind')}"/>
 <c:choose>
     <c:when test="${! empty kfindConfig}">
-        contextJsParameters.kFind={
+        contextJsParameters.kfind={
             typeOfJCRGraphQL:"${kfindConfig['typeOfJCRGraphQL']}",
             minSearchChars:${kfindConfig['minSearchChars']},
             defaultDisplayedResults:${kfindConfig['defaultDisplayedResults']},
@@ -21,10 +21,10 @@
             jcrMainResourcesEnabled:${kfindConfig['jcrMainResourcesEnabled']},
             jcrMainResourcesMaxResults:${kfindConfig['jcrMainResourcesMaxResults']}
         }
-        console.debug("%c kFind config is added to contextJsParameters", "color: #3c8cba");
+        console.debug("%c kfind config is added to contextJsParameters", "color: #3c8cba");
     </c:when>
     <c:otherwise>
-        <utility:logger level="warn" value="kFind configuration is not available"/>
-        console.warn("kFind configuration is not available");
+        <utility:logger level="warn" value="kfind configuration is not available"/>
+        console.warn("kfind configuration is not available");
     </c:otherwise>
 </c:choose>
