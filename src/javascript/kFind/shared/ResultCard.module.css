@@ -35,15 +35,17 @@
   overflow: hidden;
 }
 
-.resultRowAction {
-  width: 32px;
+.resultRowActions {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
   visibility: hidden;
 }
 
-.resultRow:hover .resultRowAction {
+.resultRow:hover .resultRowActions,
+.resultRow:focus .resultRowActions,
+.resultRowCompact:hover .resultRowActions,
+.resultRowCompact:focus .resultRowActions {
   visibility: visible;
 }

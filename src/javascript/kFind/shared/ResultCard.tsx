@@ -19,6 +19,7 @@ import {
   Button,
   Chip,
   Edit,
+  Subdirectory,
   TableRow,
   Tooltip,
   Typography,
@@ -106,8 +107,20 @@ export const ResultCard = ({
           )}
         </div>
 
-        {onSecondaryAction && (
-          <div className={s.resultRowAction}>
+        <div className={s.resultRowActions}>
+          <Tooltip label="Enter">
+            <Button
+              size="big"
+              variant="ghost"
+              icon={<Subdirectory width={24} height={24} />}
+              tabIndex={-1}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction();
+              }}
+            />
+          </Tooltip>
+          {onSecondaryAction && (
             <Tooltip label={t("search.action.edit", "Edit")}>
               <Button
                 size="big"
@@ -120,8 +133,8 @@ export const ResultCard = ({
                 }}
               />
             </Tooltip>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </TableRow>
   );

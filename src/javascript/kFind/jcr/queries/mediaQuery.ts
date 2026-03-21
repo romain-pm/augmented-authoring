@@ -2,9 +2,9 @@ import { gql } from "@apollo/client";
 import { escapeJcrSql2 } from "./pagesQuery.ts";
 
 export const JCR_MEDIA_SEARCH_QUERY = gql`
-  query JCRMediaSearch($query: String!, $limit: Int!, $offset: Int!) {
+  query JCRMediaSearch($query: String!, $limit: Int!, $offset: Int!, $language: String!) {
     jcr(workspace: EDIT) {
-      nodesByQuery(query: $query, limit: $limit, offset: $offset) {
+      nodesByQuery(query: $query, limit: $limit, offset: $offset, language: $language) {
         edges {
           node {
             displayName(language: $language)
