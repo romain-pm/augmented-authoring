@@ -51,6 +51,11 @@ export const FeatureResults = memo(
 
     const visibleFeatureHits = featureHits.slice(0, displayedCount);
     const hasMoreFeatures = displayedCount < featureHits.length;
+    // Number of items that will become visible on next click (1–10).
+    const nextFeatureBatchCount = Math.min(
+      getUiFeaturesMaxResults(),
+      featureHits.length - displayedCount,
+    );
 
     const renderFeatureRow = useCallback(
       (row: Row<FeatureHit>) => {
@@ -102,8 +107,8 @@ export const FeatureResults = memo(
         {hasMoreFeatures && (
           <Button
             variant="ghost"
-            label={t("search.showMore", "Show more ({{count}} results)", {
-              count: featureHits.length,
+            label={t("search.showMore", "Show {{count}} more", {
+              count: nextFeatureBatchCount,
             })}
             onClick={() =>
               setDisplayedCount((c) => c + getUiFeaturesMaxResults())

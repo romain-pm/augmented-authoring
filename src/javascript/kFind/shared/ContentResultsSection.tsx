@@ -68,6 +68,15 @@ export const ContentResultsSection = ({
   const visibleHits = hits.slice(0, displayedCount);
   const hasMoreToShow = displayedCount < hits.length || hasMore;
 
+  // How many items will become visible on the next "show more" click:
+  // - If there are locally buffered items left, show at most maxResults of them.
+  // - If the local buffer is exhausted but the server has more, the next fetch
+  //   will return up to maxResults items, so show that as the expected count.
+  const nextBatchCount =
+    hits.length > displayedCount
+      ? Math.min(maxResults, hits.length - displayedCount)
+      : maxResults;
+
   const handleShowMore = () => {
     const newCount = displayedCount + maxResults;
     setDisplayedCount(newCount);
@@ -136,8 +145,8 @@ export const ContentResultsSection = ({
       {!loading && hasMoreToShow && hits.length > 0 && (
         <Button
           variant="ghost"
-          label={t("search.showMore", "Show more ({{count}} results)", {
-            count: totalHits,
+          label={t("search.showMore", "Show {{count}} more", {
+            count: nextBatchCount,
           })}
           onClick={handleShowMore}
         />

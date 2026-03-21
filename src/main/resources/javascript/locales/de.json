@@ -4,7 +4,7 @@
     "placeholder": "Suchen…",
     "loading": "Suche läuft…",
     "loadingMore": "Mehr laden…",
-    "showMore": "Mehr anzeigen ({{count}} Ergebnisse)",
+    "showMore": "{{count}} weitere anzeigen",
     "action": {
       "edit": "Bearbeiten"
     },

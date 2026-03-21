@@ -72,7 +72,11 @@ export type SearchOrchestration = {
 export const useSearchOrchestration = (
   searchValue: string,
 ): SearchOrchestration => {
-  const { isAugmented, checkDone } = useIsAugmentedAvailable();
+  const {
+    isAugmented,
+    checkDone,
+    trigger: triggerAugmentedCheck,
+  } = useIsAugmentedAvailable();
   // ── Keep mutable refs in sync so callbacks always read the latest value ──
   const isAugmentedRef = useRef(isAugmented);
   isAugmentedRef.current = isAugmented;
@@ -166,12 +170,16 @@ export const useSearchOrchestration = (
   // ── Effect 2: Debounce user keystrokes ──
   // Wait after the user stops typing before firing the query.
   // The delay is shorter for augmented search (server-side indexing is faster).
+  // Also kicks off the site-index check the first time minSearchChars is reached
+  // so no GQL query fires before the user has typed enough.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (searchValue.trim().length < getMinSearchChars()) {
       resetAll();
       return;
     }
+    // Start the augmented-availability check now (idempotent — cached after first call).
+    triggerAugmentedCheck();
     const delay = isAugmentedRef.current
       ? getAugmentedFindDelay()
       : getJcrFindDelay();
