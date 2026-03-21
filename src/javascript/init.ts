@@ -8,7 +8,7 @@
  * @see registerRoutes in routes.tsx for the actual bootstrap logic.
  */
 import { registry } from "@jahia/ui-extender";
-import { registerRoutes } from "./kFind/routes.tsx";
+import { registerRoutes } from "./kfind/routes.tsx";
 
 export default function () {
   registry.add("callback", "kFind", {
