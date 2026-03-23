@@ -12,7 +12,7 @@
  * when the user exhausts the local slice, `onLoadMore` triggers the next
  * server-side page fetch in the orchestration layer.
  */
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, DataTable, Typography } from "@jahia/moonstone";
 import type { Row } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
@@ -53,6 +53,8 @@ export const ContentResultsSection = ({
 }: ContentResultsSectionProps) => {
   const { t } = useTranslation();
   const [displayedCount, setDisplayedCount] = useState(maxResults);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const focusFirstNewRef = useRef<number | null>(null);
 
   useEffect(() => {
     setDisplayedCount(maxResults);
@@ -62,12 +64,29 @@ export const ContentResultsSection = ({
   const hasMoreToShow = displayedCount < hits.length || hasMore;
 
   const handleShowMore = () => {
+    focusFirstNewRef.current = visibleHits.length;
     const newCount = displayedCount + 10;
     setDisplayedCount(newCount);
     if (newCount >= hits.length && hasMore) {
       onLoadMore();
     }
   };
+
+  // After new rows appear in the DOM, focus the first one that was just loaded.
+  useEffect(() => {
+    if (focusFirstNewRef.current === null) return;
+    const prevLength = focusFirstNewRef.current;
+    if (visibleHits.length <= prevLength) return;
+    const rows =
+      sectionRef.current?.querySelectorAll<HTMLElement>(
+        ".moonstone-tableRow[tabindex]",
+      ) ?? [];
+    const firstNew = rows[prevLength];
+    if (firstNew) {
+      firstNew.focus();
+      focusFirstNewRef.current = null;
+    }
+  }, [visibleHits.length]);
 
   const renderContentRow = useCallback(
     (row: Row<SearchHit>) => {
@@ -97,7 +116,7 @@ export const ContentResultsSection = ({
   if (hits.length === 0 && !loading) return null;
 
   return (
-    <div className={`${tableLayout.section} ${s.section}`}>
+    <div ref={sectionRef} className={`${tableLayout.section} ${s.section}`}>
       <Typography variant="heading">{title}</Typography>
 
       {loading && hits.length === 0 && (
