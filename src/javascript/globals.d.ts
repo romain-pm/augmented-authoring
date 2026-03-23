@@ -33,6 +33,8 @@ declare interface Window {
       jcrMainResourcesEnabled?: boolean;
       /** Max results shown in the JCR main resources table. Default: 4. */
       jcrMainResourcesMaxResults?: number;
+      /** Whether the URL reverse lookup feature is enabled. Default: true. */
+      urlReverseLookupEnabled?: boolean;
     };
     [key: string]: unknown;
   };

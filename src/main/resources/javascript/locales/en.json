@@ -34,6 +34,9 @@
     "jcrMainResources": {
       "title": "Main Resource (Full page content)"
     },
+    "urlReverseLookup": {
+      "title": "Direct URL match"
+    },
     "features": {
       "title": "Features",
       "chip": "Feature",

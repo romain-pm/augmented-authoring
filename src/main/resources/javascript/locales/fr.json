@@ -34,6 +34,9 @@
     "jcrMainResources": {
       "title": "Ressource principale (contenu pleine page)"
     },
+    "urlReverseLookup": {
+      "title": "Correspondance URL directe"
+    },
     "features": {
       "title": "Fonctionnalités",
       "chip": "Fonctionnalité",

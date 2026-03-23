@@ -19,6 +19,7 @@ import {
   getMinSearchChars,
 } from "../shared/searchUtils.ts";
 import hideTableHead from "../shared/hideTableHead.module.css";
+import s from "../shared/ContentResultsSection.module.css";
 
 const featureColumns = [{ key: "label" as const, label: "" }];
 
@@ -88,7 +89,7 @@ export const FeatureResults = memo(
     if (featureHits.length === 0) return null;
 
     return (
-      <div className={hideTableHead.section}>
+      <div className={`${hideTableHead.section} ${s.section}`}>
         <Typography variant="heading">
           {t("search.features.title", "Features")}
         </Typography>

@@ -34,6 +34,9 @@
     "jcrMainResources": {
       "title": "Hauptressource (ganzseitiger Inhalt)"
     },
+    "urlReverseLookup": {
+      "title": "Direkte URL-Übereinstimmung"
+    },
     "features": {
       "title": "Funktionen",
       "chip": "Funktion",

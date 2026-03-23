@@ -20,6 +20,7 @@
     <properties>
         <!--<jahia-module-type>system</jahia-module-type>-->
         <!--<require-capability>osgi.extender;filter:="(osgi.extender=org.jahia.bundles.blueprint.extender.config)"</require-capability> -->
+        <jahia-depends>default,graphql-dxm-provider</jahia-depends>
     </properties>
 
     <repositories>
@@ -37,6 +38,21 @@
         </repository>
     </repositories>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.jahia.modules</groupId>
+            <artifactId>graphql-dxm-provider</artifactId>
+            <version>3.6.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.graphql-java</groupId>
+            <artifactId>graphql-java-annotations</artifactId>
+            <version>9.1</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -52,6 +68,12 @@
                     <instructions>
                         <Bundle-SymbolicName>kfind</Bundle-SymbolicName>
                         <_dsannotations>*</_dsannotations>
+                        <Import-Package>
+                            org.jahia.modules.graphql.provider.dxm,
+                            org.jahia.modules.graphql.provider.dxm.node,
+                            ${jahia.plugin.projectPackageImport},
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

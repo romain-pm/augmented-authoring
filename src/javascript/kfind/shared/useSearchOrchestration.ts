@@ -22,8 +22,9 @@ import { useJcrSearch } from "../jcr/useJcrSearch.ts";
 import { useJcrMediaSearch } from "../jcr/useJcrMediaSearch.ts";
 import { useJcrMainResourcesSearch } from "../jcr/useJcrMainResourcesSearch.ts";
 import { useFeatureSearch } from "../features/useFeatureSearch.ts";
+import { useUrlReverseLookup } from "../urlReverseLookup/useUrlReverseLookup.ts";
 import type { ContentSearchDriver } from "./searchTypes.ts";
-import type { FeatureHit } from "./searchTypes.ts";
+import type { FeatureHit, SearchHit } from "./searchTypes.ts";
 import {
   getMinSearchChars,
   getAugmentedFindDelay,
@@ -31,6 +32,7 @@ import {
   isJcrMediaEnabled,
   isJcrPagesEnabled,
   isJcrMainResourcesEnabled,
+  isUrlReverseLookupEnabled,
 } from "./searchUtils.ts";
 
 /**
@@ -61,6 +63,8 @@ function useDriverPagination(
 export type SearchOrchestration = {
   isAugmented: boolean;
   featureHits: FeatureHit[];
+  urlReverseLookupHit: SearchHit | null;
+  urlReverseLookupLoading: boolean;
   augmented: DriverWithPagination;
   jcrMedia: DriverWithPagination;
   jcrPages: DriverWithPagination;
@@ -97,6 +101,8 @@ export const useSearchOrchestration = (
   const jcrMainResourcesRaw = useJcrMainResourcesSearch();
   /** Feature search is synchronous — filters the Jahia UI registry in-memory. */
   const featureHits = useFeatureSearch(searchValue);
+  /** URL reverse lookup — resolves pasted live URLs to JCR nodes. */
+  const urlReverseLookup = useUrlReverseLookup();
 
   // ── Wrap each driver with pagination helpers ──
   const augmented = useDriverPagination(augmentedRaw, currentQueryRef);
@@ -122,6 +128,13 @@ export const useSearchOrchestration = (
     const trimmed = value.trim();
     if (trimmed.length < getMinSearchChars() || !checkDoneRef.current) return;
     currentQueryRef.current = trimmed;
+
+    // URL reverse lookup — fire when the input looks like a URL
+    if (isUrlReverseLookupEnabled() && looksLikeUrl(trimmed)) {
+      urlReverseLookup.search(trimmed);
+    } else {
+      urlReverseLookup.reset();
+    }
 
     if (isJcrMediaEnabled()) {
       jcrMedia.pageRef.current = 0;
@@ -149,6 +162,7 @@ export const useSearchOrchestration = (
     jcrMediaRaw.reset();
     jcrPagesRaw.reset();
     jcrMainResourcesRaw.reset();
+    urlReverseLookup.reset();
     currentQueryRef.current = "";
   };
 
@@ -195,6 +209,8 @@ export const useSearchOrchestration = (
   return {
     isAugmented,
     featureHits,
+    urlReverseLookupHit: urlReverseLookup.hit,
+    urlReverseLookupLoading: urlReverseLookup.loading,
     augmented,
     jcrMedia,
     jcrPages,
@@ -203,3 +219,12 @@ export const useSearchOrchestration = (
     triggerSearch,
   };
 };
+
+/** Returns true if the input string looks like a URL (starts with http(s):// or contains a dot with path). */
+function looksLikeUrl(input: string): boolean {
+  if (input.startsWith("http://") || input.startsWith("https://")) return true;
+  if (input.startsWith("/") && input.length > 1) return true;
+  // e.g. "www.example.com/page" or "example.com/page"
+  if (/^[\w-]+\.[\w.-]+\//.test(input)) return true;
+  return false;
+}

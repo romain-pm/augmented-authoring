@@ -8,6 +8,13 @@
   cursor: pointer;
 }
 
+.resultRow:focus-visible,
+.resultRowCompact:focus-visible {
+  outline: 2px solid var(--color-accent_light);
+  outline-offset: -2px;
+  border-radius: 2px;
+}
+
 .resultRowContent {
   display: flex;
   align-items: center;

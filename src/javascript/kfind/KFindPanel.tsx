@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { KFindHeader } from "./KFindHeader.tsx";
 import { useSearchOrchestration } from "./shared/useSearchOrchestration.ts";
 import { FeatureResults } from "./features/FeatureResults.tsx";
+import { UrlReverseLookupResults } from "./urlReverseLookup/UrlReverseLookupResults.tsx";
 import { ContentResultsSection } from "./shared/ContentResultsSection.tsx";
 import {
   getMinSearchChars,
@@ -29,6 +30,7 @@ import {
   getJcrPagesMaxResults,
   isJcrMainResourcesEnabled,
   getJcrMainResourcesMaxResults,
+  isUrlReverseLookupEnabled,
 } from "./shared/searchUtils.ts";
 import styles from "./shared/layout.module.css";
 import s from "./KFindPanel.module.css";
@@ -47,6 +49,8 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
   const {
     isAugmented,
     featureHits,
+    urlReverseLookupHit,
+    urlReverseLookupLoading,
     augmented,
     jcrMedia,
     jcrPages,
@@ -70,6 +74,7 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
 
   const hasAnyResults =
     (isUiFeaturesEnabled() && featureHits.length > 0) ||
+    (isUrlReverseLookupEnabled() && urlReverseLookupHit !== null) ||
     (isJcrMediaEnabled() && jcrMedia.driver.hits.length > 0) ||
     (isAugmented && augmented.driver.hits.length > 0) ||
     (!isAugmented && isJcrPagesEnabled() && jcrPages.driver.hits.length > 0) ||
@@ -104,6 +109,17 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
             icon={<Search size="big" />}
             title={t("search.empty.title", "Find anything.")}
             message={t("search.empty.hint", { min: minChars })}
+          />
+        )}
+
+        {/* ── 0. Direct URL Match (always first, if enabled) ── */}
+        {isUrlReverseLookupEnabled() && trimmedQuery.length >= minChars && (
+          <UrlReverseLookupResults
+            hit={urlReverseLookupHit}
+            loading={urlReverseLookupLoading}
+            scrollContainerRef={scrollContainerRef}
+            inputWrapperRef={inputWrapperRef}
+            onNavigate={onNavigate}
           />
         )}
 

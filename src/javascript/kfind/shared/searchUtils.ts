@@ -99,6 +99,10 @@ export function getJcrMainResourcesMaxResults(): number {
   return window.contextJsParameters.kfind?.jcrMainResourcesMaxResults ?? 4;
 }
 
+export function isUrlReverseLookupEnabled(): boolean {
+  return window.contextJsParameters.kfind?.urlReverseLookupEnabled !== false;
+}
+
 /**
  * Navigates the parent jContent SPA to the given node path by pushing a new
  * URL into its history and firing a synthetic popstate so React Router picks

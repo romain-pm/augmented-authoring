@@ -19,7 +19,8 @@
             jcrPagesEnabled:${kfindConfig['jcrPagesEnabled']},
             jcrPagesMaxResults:${kfindConfig['jcrPagesMaxResults']},
             jcrMainResourcesEnabled:${kfindConfig['jcrMainResourcesEnabled']},
-            jcrMainResourcesMaxResults:${kfindConfig['jcrMainResourcesMaxResults']}
+            jcrMainResourcesMaxResults:${kfindConfig['jcrMainResourcesMaxResults']},
+            urlReverseLookupEnabled:${kfindConfig['urlReverseLookupEnabled']}
         }
         console.debug("%c kfind config is added to contextJsParameters", "color: #3c8cba");
     </c:when>
