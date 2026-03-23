@@ -35,6 +35,7 @@ type ResultCardProps = {
   type: string;
   path: string;
   excerpt?: string | null;
+  thumbnailUrl?: string | null;
   /** Called when the row is clicked or Enter is pressed. */
   onAction: () => void;
   /** Optional secondary action button (e.g. edit). Hidden by default, shown on hover. */
@@ -48,6 +49,7 @@ export const ResultCard = ({
   type,
   path,
   excerpt,
+  thumbnailUrl,
   onAction,
   onSecondaryAction,
   scrollContainerRef,
@@ -92,6 +94,14 @@ export const ResultCard = ({
       onKeyDown={handleKeyDown}
     >
       <div className={s.resultRowContent}>
+        {thumbnailUrl && (
+          <img
+            className={s.thumbnail}
+            src={thumbnailUrl}
+            alt=""
+            loading="lazy"
+          />
+        )}
         <div className={s.resultRowInfo}>
           <Typography variant="subHeading">{displayTitle}</Typography>
           <div className={s.resultRowMeta}>

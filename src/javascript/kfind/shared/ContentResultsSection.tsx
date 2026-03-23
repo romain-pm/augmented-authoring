@@ -79,8 +79,9 @@ export const ContentResultsSection = ({
           type={hit.nodeType}
           path={hit.path}
           excerpt={hit.excerpt}
+          thumbnailUrl={hit.thumbnailUrl}
           onAction={() => {
-            locateInJContent(hit.path);
+            locateInJContent(hit.path, hit.nodeType);
             onNavigate?.();
           }}
           onSecondaryAction={() => editNode(hit.path)}

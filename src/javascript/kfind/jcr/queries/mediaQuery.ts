@@ -25,6 +25,7 @@ export const JCR_MEDIA_SEARCH_QUERY = gql`
             primaryNodeType {
               name
             }
+            thumbnailUrl(name: "thumbnail", checkIfExists: true)
           }
         }
       }
@@ -66,6 +67,7 @@ export const JCR_MEDIA_BY_CRITERIA_QUERY = gql`
           primaryNodeType {
             name
           }
+          thumbnailUrl(name: "thumbnail", checkIfExists: true)
         }
       }
     }

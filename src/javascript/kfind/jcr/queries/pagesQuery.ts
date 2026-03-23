@@ -78,6 +78,7 @@ export type JcrNode = {
   path: string;
   uuid: string;
   primaryNodeType: { name: string };
+  thumbnailUrl?: string | null;
 };
 
 /** Escapes a value for embedding in a JCR-SQL2 string literal. */
@@ -114,5 +115,6 @@ export function jcrNodeToSearchHit(node: JcrNode): SearchHit {
     displayableName: node.displayName || node.name,
     excerpt: null,
     nodeType: node.primaryNodeType.name,
+    thumbnailUrl: node.thumbnailUrl ?? null,
   };
 }

@@ -14,6 +14,8 @@ export type SearchHit = {
   excerpt: string | null;
   /** JCR primary node type (e.g. jnt:page, jnt:file). */
   nodeType: string;
+  /** URL to a thumbnail image, if available (e.g. for media nodes). */
+  thumbnailUrl?: string | null;
 };
 
 /** A UI feature result (admin routes / jExperience menu entries from the Jahia registry). */

@@ -21,6 +21,15 @@
   width: 100%;
 }
 
+.thumbnail {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
 .resultRowInfo {
   display: flex;
   flex-direction: column;

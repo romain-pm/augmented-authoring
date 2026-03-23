@@ -107,8 +107,12 @@ export function isUrlReverseLookupEnabled(): boolean {
  * Navigates the parent jContent SPA to the given node path by pushing a new
  * URL into its history and firing a synthetic popstate so React Router picks
  * it up — without a full page reload.
+ *
+ * When `nodeType` is a page-like type (`jnt:page`, `jmix:mainResource`, etc.)
+ * we set jContent's localStorage key so it opens in Page Builder view instead
+ * of the default flat-list view.
  */
-export function locateInJContent(nodePath: string): void {
+export function locateInJContent(nodePath: string, nodeType?: string): void {
   const site = getSiteKey();
   const language = getUiLanguage();
   const siteBase = `/sites/${site}`;
@@ -131,6 +135,18 @@ export function locateInJContent(nodePath: string): void {
     urlPath = parentPath.replace(siteBase, "") || "/";
   }
 
+  // Force Page Builder view for page-like node types
+  if (mode === "pages" && nodeType && isPageLikeNodeType(nodeType)) {
+    try {
+      window.parent.localStorage.setItem(
+        `jcontent-previous-tableView-viewMode-${site}-${mode}`,
+        "pageBuilder",
+      );
+    } catch {
+      // localStorage may be blocked (privacy settings) — continue anyway
+    }
+  }
+
   const encodedPath = urlPath
     .split("/")
     .map((s) => (s ? encodeURIComponent(s) : ""))
@@ -144,4 +160,9 @@ export function locateInJContent(nodePath: string): void {
   window.parent.dispatchEvent(
     new PopStateEvent("popstate", { state: { key: navKey } }),
   );
+}
+
+/** Returns true for node types that should open in Page Builder. */
+function isPageLikeNodeType(nodeType: string): boolean {
+  return nodeType === "jnt:page" || nodeType.startsWith("jmix:mainResource");
 }

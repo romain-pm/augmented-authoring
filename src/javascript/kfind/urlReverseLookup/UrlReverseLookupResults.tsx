@@ -46,8 +46,9 @@ export const UrlReverseLookupResults = ({
           type={h.nodeType}
           path={h.path}
           excerpt={h.excerpt}
+          thumbnailUrl={h.thumbnailUrl}
           onAction={() => {
-            locateInJContent(h.path);
+            locateInJContent(h.path, h.nodeType);
             onNavigate?.();
           }}
           onSecondaryAction={() => editNode(h.path)}
