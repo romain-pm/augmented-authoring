@@ -43,6 +43,9 @@ declare interface Window {
   };
   jahia?: {
     routerHistory?: { push: (path: string) => void; [k: string]: unknown };
+    reduxStore?: {
+      dispatch: (action: { type: string; payload?: unknown }) => void;
+    };
     uiExtender?: {
       registry?: {
         registry?: Record<

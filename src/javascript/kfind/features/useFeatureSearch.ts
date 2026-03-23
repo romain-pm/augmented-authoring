@@ -14,11 +14,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { FeatureHit } from "../shared/searchTypes.ts";
-import {
-  getSiteKey,
-  getSearchLanguage,
-  getMinSearchChars,
-} from "../shared/searchUtils.ts";
+import { getSiteKey, getSearchLanguage } from "../shared/navigationUtils.ts";
+import { getMinSearchChars } from "../shared/configUtils.ts";
 
 export function useFeatureSearch(query: string): FeatureHit[] {
   const { t } = useTranslation();

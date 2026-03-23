@@ -17,7 +17,7 @@
 import { useLazyQuery } from "@apollo/client";
 import { useCallback, useState } from "react";
 import { SITE_INDEX_QUERY } from "../augmented/augmentedSearchQuery.ts";
-import { getSiteKey } from "./searchUtils.ts";
+import { getSiteKey } from "./navigationUtils.ts";
 
 // Module-level cache: site key → whether augmented search is available.
 // Populated once per site per page load — never re-queried.

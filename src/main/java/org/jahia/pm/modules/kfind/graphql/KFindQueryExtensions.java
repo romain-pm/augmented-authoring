@@ -5,20 +5,22 @@ import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLNonNull;
 import graphql.annotations.annotationTypes.GraphQLTypeExtension;
+import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.graphql.provider.dxm.DXGraphQLProvider;
 import org.jahia.modules.graphql.provider.dxm.node.GqlJcrNode;
 import org.jahia.modules.graphql.provider.dxm.node.GqlJcrNodeImpl;
 import org.jahia.osgi.BundleUtils;
-import org.jahia.services.content.JCRContentUtils;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.seo.VanityUrl;
+import org.jahia.services.seo.jcr.VanityUrlManager;
 import org.jahia.services.seo.jcr.VanityUrlService;
 
 import javax.jcr.RepositoryException;
 import java.net.URI;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Extends the Jahia GraphQL Query type with a {@code urlReverseLookup} field.
@@ -37,6 +39,9 @@ import java.util.List;
 @GraphQLDescription("kfind URL reverse lookup extension")
 public class KFindQueryExtensions {
 
+    private static final Pattern SITE_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9_-]+$");
+    private static final String VANITY_MAPPINGS_SEGMENT = "/" + VanityUrlManager.VANITYURLMAPPINGS_NODE + "/";
+
     /**
      * Resolve a live website URL to its target JCR node.
      *
@@ -50,6 +55,10 @@ public class KFindQueryExtensions {
     public static GqlJcrNode urlReverseLookup(
             @GraphQLNonNull @GraphQLName("url") @GraphQLDescription("The URL or path to look up") String url,
             @GraphQLNonNull @GraphQLName("siteKey") @GraphQLDescription("The Jahia site key") String siteKey) {
+        if (!SITE_KEY_PATTERN.matcher(siteKey).matches()) {
+            throw new IllegalArgumentException("Invalid site key: " + siteKey);
+        }
+
         try {
             JCRSessionWrapper session = JCRSessionFactory.getInstance()
                     .getCurrentUserSession("default");
@@ -57,14 +66,17 @@ public class KFindQueryExtensions {
             // Extract the path portion from the URL
             String path = extractPath(url);
 
+            // Clean the path once — used by both resolution strategies
+            String cleanPath = cleanUrlPath(path, siteKey);
+
             // 1. Try vanity URL lookup
-            GqlJcrNode vanityResult = findByVanityUrl(path, siteKey, session);
+            GqlJcrNode vanityResult = findByVanityUrl(cleanPath, siteKey, session);
             if (vanityResult != null) {
                 return vanityResult;
             }
 
             // 2. Fallback: try direct JCR path resolution under /sites/{siteKey}
-            return findByDirectPath(path, siteKey, session);
+            return findByDirectPath(cleanPath, siteKey, session);
         } catch (RepositoryException e) {
             throw new RuntimeException("Error during URL reverse lookup: " + e.getMessage(), e);
         }
@@ -90,50 +102,51 @@ public class KFindQueryExtensions {
     }
 
     /**
+     * Strips common Jahia URL prefixes to extract the meaningful content path.
+     * Handles /cms/render/live|default/xx, /sites/{siteKey}, language prefixes, and
+     * .html suffix.
+     */
+    private static String cleanUrlPath(String path, String siteKey) {
+        // Remove /cms/render/live|default/xx prefix
+        path = path.replaceFirst("^/cms/render/(live|default)/[a-z]{2}", "");
+
+        // Remove /sites/{siteKey} prefix
+        String sitePrefix = "/sites/" + siteKey;
+        if (path.startsWith(sitePrefix)) {
+            path = path.substring(sitePrefix.length());
+        }
+
+        // Remove language prefix /xx/
+        if (path.matches("^/[a-z]{2}(/.*)?$")) {
+            path = path.substring(3);
+        }
+
+        // Remove .html suffix
+        if (path.endsWith(".html")) {
+            path = path.substring(0, path.length() - 5);
+        }
+
+        return path.isEmpty() ? "/" : path;
+    }
+
+    /**
      * Attempts to find a node via vanity URL matching.
      */
-    private static GqlJcrNode findByVanityUrl(String path, String siteKey, JCRSessionWrapper session)
+    private static GqlJcrNode findByVanityUrl(String cleanPath, String siteKey, JCRSessionWrapper session)
             throws RepositoryException {
         VanityUrlService vanityUrlService = BundleUtils.getOsgiService(VanityUrlService.class, null);
         if (vanityUrlService == null) {
             return null;
         }
 
-        // Try the path as-is for vanity URL lookup
-        String vanityPath = path;
-
-        // Strip common Jahia URL prefixes to get the vanity path
-        // e.g., /cms/render/live/en/sites/mysite/my-page → /my-page
-        // or /en/my-page → /my-page
-        String sitePrefix = "/sites/" + JCRContentUtils.sqlEncode(siteKey);
-        int siteIdx = vanityPath.indexOf(sitePrefix);
-        if (siteIdx >= 0) {
-            vanityPath = vanityPath.substring(siteIdx + sitePrefix.length());
-        }
-
-        // Also strip language prefix like /en/ or /fr/
-        if (vanityPath.matches("^/[a-z]{2}(/.*)?$")) {
-            vanityPath = vanityPath.substring(3); // Remove /xx
-        }
-
-        if (vanityPath.isEmpty()) {
-            vanityPath = "/";
-        }
-
-        // Remove trailing .html if present
-        if (vanityPath.endsWith(".html")) {
-            vanityPath = vanityPath.substring(0, vanityPath.length() - 5);
-        }
-
         List<VanityUrl> urls = vanityUrlService.findExistingVanityUrls(
-                vanityPath, siteKey, session.getWorkspace().getName());
+                cleanPath, siteKey, session.getWorkspace().getName());
 
         for (VanityUrl vanityUrl : urls) {
             if (vanityUrl.isActive()) {
                 try {
-                    JCRNodeWrapper vanityNode = session.getNode(vanityUrl.getPath());
-                    // Navigate to the target node (parent of the vanity URL node)
-                    JCRNodeWrapper targetNode = vanityNode.getParent().getParent();
+                    String nodePath = StringUtils.substringBefore(vanityUrl.getPath(), VANITY_MAPPINGS_SEGMENT);
+                    JCRNodeWrapper targetNode = session.getNode(nodePath);
                     return new GqlJcrNodeImpl(targetNode);
                 } catch (RepositoryException ignored) {
                     // Skip broken vanity URL entries
@@ -147,19 +160,23 @@ public class KFindQueryExtensions {
     /**
      * Attempts to resolve the URL path as a direct JCR node path.
      */
-    private static GqlJcrNode findByDirectPath(String path, String siteKey, JCRSessionWrapper session) {
-        // Build candidate paths to try
-        String siteRoot = "/sites/" + JCRContentUtils.sqlEncode(siteKey);
-        String[] candidates = buildCandidatePaths(path, siteRoot);
+    private static GqlJcrNode findByDirectPath(String cleanPath, String siteKey, JCRSessionWrapper session) {
+        String siteRoot = "/sites/" + siteKey;
+
+        // If path already starts with /sites/, use it directly
+        if (cleanPath.startsWith("/sites/")) {
+            return tryResolveNode(cleanPath, session);
+        }
+
+        String[] candidates = new String[] {
+                siteRoot + cleanPath,
+                siteRoot + "/home" + cleanPath
+        };
 
         for (String candidate : candidates) {
-            try {
-                if (session.nodeExists(candidate)) {
-                    JCRNodeWrapper node = session.getNode(candidate);
-                    return new GqlJcrNodeImpl(node);
-                }
-            } catch (RepositoryException ignored) {
-                // Try next candidate
+            GqlJcrNode result = tryResolveNode(candidate, session);
+            if (result != null) {
+                return result;
             }
         }
 
@@ -167,42 +184,16 @@ public class KFindQueryExtensions {
     }
 
     /**
-     * Builds candidate JCR paths from a URL path, trying various transformations.
+     * Tries to resolve a single JCR path, returning null on failure.
      */
-    private static String[] buildCandidatePaths(String path, String siteRoot) {
-        // Strip common Jahia URL prefixes
-        String cleanPath = path;
-
-        // Remove /cms/render/live/xx or /cms/render/default/xx prefix
-        cleanPath = cleanPath.replaceFirst("^/cms/render/(live|default)/[a-z]{2}", "");
-
-        // If path already contains /sites/xxx, use it directly
-        if (cleanPath.startsWith("/sites/")) {
-            return new String[] { cleanPath };
+    private static GqlJcrNode tryResolveNode(String path, JCRSessionWrapper session) {
+        try {
+            if (session.nodeExists(path)) {
+                return new GqlJcrNodeImpl(session.getNode(path));
+            }
+        } catch (RepositoryException ignored) {
+            // Node not found at this path
         }
-
-        // Strip the site root prefix if present
-        if (cleanPath.startsWith(siteRoot)) {
-            cleanPath = cleanPath.substring(siteRoot.length());
-        }
-
-        // Strip language prefix like /en/ or /fr/
-        if (cleanPath.matches("^/[a-z]{2}(/.*)?$")) {
-            cleanPath = cleanPath.substring(3);
-        }
-
-        // Remove .html suffix
-        if (cleanPath.endsWith(".html")) {
-            cleanPath = cleanPath.substring(0, cleanPath.length() - 5);
-        }
-
-        if (cleanPath.isEmpty()) {
-            cleanPath = "/home";
-        }
-
-        return new String[] {
-                siteRoot + cleanPath,
-                siteRoot + "/home" + cleanPath
-        };
+        return null;
     }
 }

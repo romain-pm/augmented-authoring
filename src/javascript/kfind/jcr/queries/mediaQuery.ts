@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { escapeJcrSql2 } from "./pagesQuery.ts";
+import { buildJcrSql2 } from "./jcrQueryUtils.ts";
 
 export const JCR_MEDIA_SEARCH_QUERY = gql`
   query JCRMediaSearch(
@@ -74,11 +74,5 @@ export const JCR_MEDIA_BY_CRITERIA_QUERY = gql`
   }
 `;
 
-export function buildJcrMediaSql2(
-  searchTerm: string,
-  sitePath: string,
-): string {
-  const escapedTerm = escapeJcrSql2(searchTerm);
-  const escapedPath = escapeJcrSql2(sitePath);
-  return `SELECT * FROM [jnt:file] as node WHERE ISDESCENDANTNODE(node, '${escapedPath}') AND contains(node.*, '${escapedTerm}') ORDER BY node.[j:lastModified] DESC`;
-}
+export const buildMediaSql2 = (searchTerm: string, sitePath: string): string =>
+  buildJcrSql2("jnt:file", searchTerm, sitePath);

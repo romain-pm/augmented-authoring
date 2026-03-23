@@ -33,7 +33,7 @@ import {
   isJcrPagesEnabled,
   isJcrMainResourcesEnabled,
   isUrlReverseLookupEnabled,
-} from "./searchUtils.ts";
+} from "./configUtils.ts";
 
 /**
  * Wraps a ContentSearchDriver with a page counter and a

@@ -16,7 +16,7 @@
 import React, { useEffect } from "react";
 import { Input, Search, Typography } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import { getSiteKey, getSearchLanguage } from "./shared/searchUtils.ts";
+import { getSiteKey, getSearchLanguage } from "./shared/navigationUtils.ts";
 import s from "./KFindHeader.module.css";
 
 type KFindHeaderProps = {

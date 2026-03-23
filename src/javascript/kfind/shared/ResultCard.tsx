@@ -25,7 +25,7 @@ import {
   Typography,
 } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import { sanitizeHtml } from "./searchUtils.ts";
+import { sanitizeHtml } from "./htmlUtils.ts";
 import s from "./ResultCard.module.css";
 
 const MAX_NAME_LENGTH = 80;

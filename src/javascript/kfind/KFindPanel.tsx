@@ -31,7 +31,7 @@ import {
   isJcrMainResourcesEnabled,
   getJcrMainResourcesMaxResults,
   isUrlReverseLookupEnabled,
-} from "./shared/searchUtils.ts";
+} from "./shared/configUtils.ts";
 import styles from "./shared/layout.module.css";
 import s from "./KFindPanel.module.css";
 

@@ -1,19 +1,15 @@
-import { JCR_SEARCH_QUERY } from "./queries/pagesQuery.ts";
 import {
   JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY,
-  buildJcrMainResourcesSql2,
+  buildMainResourcesSql2,
 } from "./queries/mainResourcesQuery.ts";
+import { JCR_NODES_BY_QUERY } from "./queries/jcrQueryUtils.ts";
 import type { ContentSearchDriver } from "../shared/searchTypes.ts";
 import { useJcrSearchDriver } from "./useJcrSearchDriver.ts";
 
-/**
- * Searches for jmix:mainResource nodes using JCR.
- * Reuses JCR_SEARCH_QUERY (generic nodesByQuery) for the SQL2 approach
- * since the SQL2 string itself filters by jmix:mainResource.
- */
+/** Searches for jmix:mainResource nodes using JCR. */
 export const useJcrMainResourcesSearch = (): ContentSearchDriver =>
   useJcrSearchDriver({
-    nodesByQueryDoc: JCR_SEARCH_QUERY,
+    nodesByQueryDoc: JCR_NODES_BY_QUERY,
     nodesByCriteriaDoc: JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY,
-    buildSql2: buildJcrMainResourcesSql2,
+    buildSql2: buildMainResourcesSql2,
   });

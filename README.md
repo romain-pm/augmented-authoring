@@ -8,13 +8,13 @@ React 18 + TypeScript, bundled with Vite 7 and Module Federation (`@jahia/vite-f
 
 ## Keyboard Shortcuts
 
-| Action | Key |
-|--------|-----|
-| Open / close modal | **⌘K** / **Ctrl+K** |
-| Close modal | **Esc** |
-| Navigate results | **↑** / **↓** |
-| Go to selected result | **Enter** |
-| Edit selected result | **E** |
+| Action                | Key                 |
+| --------------------- | ------------------- |
+| Open / close modal    | **⌘K** / **Ctrl+K** |
+| Close modal           | **Esc**             |
+| Navigate results      | **↑** / **↓**       |
+| Go to selected result | **Enter**           |
+| Edit selected result  | **E**               |
 
 A custom DOM event `kfind:open-search` can also open the modal programmatically (used by the nav search button).
 
@@ -56,22 +56,22 @@ The module registers itself via `@jahia/ui-extender` at app startup. Because the
 
 All settings are defined in the OSGi configuration file `org.jahia.pm.modules.kfind.cfg` and injected at runtime into `window.contextJsParameters.kfind` via a JSP filter.
 
-| Property | Default | Description |
-|----------|---------|-------------|
-| `minSearchChars` | 3 | Minimum characters before search fires |
-| `defaultDisplayedResults` | 5 | Initial results per section before "Show more" |
-| `augmentedFindDelayInTypingToLaunchSearch` | 300 | Debounce delay in ms (augmented search) |
-| `jcrFindDelayInTypingToLaunchSearch` | 300 | Debounce delay in ms (JCR fallback) |
-| `typeOfJCRGraphQL` | `nodesByCriteria` | JCR query mode (`nodesByCriteria` or `nodesByQuery`) |
-| `uiFeaturesEnabled` | true | Show UI Features section |
-| `uiFeaturesMaxResults` | 2 | Max features displayed initially |
-| `jcrMediaEnabled` | true | Show Media section |
-| `jcrMediaMaxResults` | 2 | Max media results initially |
-| `jcrPagesEnabled` | true | Show JCR Pages section (when augmented unavailable) |
-| `jcrPagesMaxResults` | 4 | Max page results initially |
-| `jcrMainResourcesEnabled` | true | Show JCR Main Resources section |
-| `jcrMainResourcesMaxResults` | 4 | Max main resource results initially |
-| `urlReverseLookupEnabled` | true | Enable URL → node resolution |
+| Property                                   | Default           | Description                                          |
+| ------------------------------------------ | ----------------- | ---------------------------------------------------- |
+| `minSearchChars`                           | 3                 | Minimum characters before search fires               |
+| `defaultDisplayedResults`                  | 5                 | Initial results per section before "Show more"       |
+| `augmentedFindDelayInTypingToLaunchSearch` | 300               | Debounce delay in ms (augmented search)              |
+| `jcrFindDelayInTypingToLaunchSearch`       | 300               | Debounce delay in ms (JCR fallback)                  |
+| `typeOfJCRGraphQL`                         | `nodesByCriteria` | JCR query mode (`nodesByCriteria` or `nodesByQuery`) |
+| `uiFeaturesEnabled`                        | true              | Show UI Features section                             |
+| `uiFeaturesMaxResults`                     | 2                 | Max features displayed initially                     |
+| `jcrMediaEnabled`                          | true              | Show Media section                                   |
+| `jcrMediaMaxResults`                       | 2                 | Max media results initially                          |
+| `jcrPagesEnabled`                          | true              | Show JCR Pages section (when augmented unavailable)  |
+| `jcrPagesMaxResults`                       | 4                 | Max page results initially                           |
+| `jcrMainResourcesEnabled`                  | true              | Show JCR Main Resources section                      |
+| `jcrMainResourcesMaxResults`               | 4                 | Max main resource results initially                  |
+| `urlReverseLookupEnabled`                  | true              | Enable URL → node resolution                         |
 
 ## Internationalization
 

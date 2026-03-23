@@ -17,8 +17,8 @@ import type { FeatureHit } from "../shared/searchTypes.ts";
 import {
   getUiFeaturesMaxResults,
   getMinSearchChars,
-} from "../shared/searchUtils.ts";
-import hideTableHead from "../shared/hideTableHead.module.css";
+} from "../shared/configUtils.ts";
+import tableLayout from "../shared/resultsTableLayout.module.css";
 import s from "../shared/ContentResultsSection.module.css";
 
 const featureColumns = [{ key: "label" as const, label: "" }];
@@ -89,12 +89,12 @@ export const FeatureResults = memo(
     if (featureHits.length === 0) return null;
 
     return (
-      <div className={`${hideTableHead.section} ${s.section}`}>
+      <div className={`${tableLayout.section} ${s.section}`}>
         <Typography variant="heading">
           {t("search.features.title", "Features")}
         </Typography>
         <DataTable<FeatureHit>
-          className={hideTableHead.resultsTable}
+          className={tableLayout.resultsTable}
           data={visibleFeatureHits}
           primaryKey="key"
           columns={featureColumns}
@@ -102,7 +102,7 @@ export const FeatureResults = memo(
         />
         {hasMoreFeatures && (
           <Button
-            className={hideTableHead.showMoreButton}
+            className={tableLayout.showMoreButton}
             variant="ghost"
             label={t("search.showMore", "Show more")}
             onClick={() => setDisplayedCount((c) => c + 10)}

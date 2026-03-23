@@ -18,8 +18,8 @@ import type { Row } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
 import { ResultCard } from "./ResultCard.tsx";
 import type { SearchHit } from "./searchTypes.ts";
-import { locateInJContent } from "./searchUtils.ts";
-import hideTableHead from "./hideTableHead.module.css";
+import { locateInJContent } from "./navigationUtils.ts";
+import tableLayout from "./resultsTableLayout.module.css";
 import s from "./ContentResultsSection.module.css";
 
 const editNode = (path: string) => window.parent.CE_API?.edit({ path });
@@ -97,7 +97,7 @@ export const ContentResultsSection = ({
   if (hits.length === 0 && !loading) return null;
 
   return (
-    <div className={`${hideTableHead.section} ${s.section}`}>
+    <div className={`${tableLayout.section} ${s.section}`}>
       <Typography variant="heading">{title}</Typography>
 
       {loading && hits.length === 0 && (
@@ -108,7 +108,7 @@ export const ContentResultsSection = ({
 
       {visibleHits.length > 0 && (
         <DataTable<SearchHit>
-          className={hideTableHead.resultsTable}
+          className={tableLayout.resultsTable}
           data={visibleHits}
           primaryKey="id"
           columns={contentColumns}
@@ -124,7 +124,7 @@ export const ContentResultsSection = ({
 
       {!loading && hasMoreToShow && hits.length > 0 && (
         <Button
-          className={hideTableHead.showMoreButton}
+          className={tableLayout.showMoreButton}
           variant="ghost"
           label={t("search.showMore", "Show more")}
           onClick={handleShowMore}
