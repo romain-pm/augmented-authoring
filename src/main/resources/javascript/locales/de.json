@@ -16,7 +16,7 @@
     },
     "empty": {
       "title": "Alles finden.",
-      "hint": "Funktionen, Seiten, Ganzseitige Inhalte, Medien, Dokumente - einfach tippen (mind. {{min}} Zeichen)."
+      "hint": "Funktionen, Vollständige URLs, Seiten, Ganzseitige Inhalte, Medien, Dokumente - einfach tippen (mind. {{min}} Zeichen)."
     },
     "noResults": {
       "title": "Keine Ergebnisse.",

@@ -44,9 +44,18 @@ export function locateInJContent(nodePath: string, nodeType?: string): void {
 
   let mode: string;
   let urlPath: string;
+  let mediaPreviewPath: string | null = null;
   if (parentPath.startsWith(`${siteBase}/files`)) {
     mode = "media";
-    urlPath = parentPath.replace(siteBase, "");
+    // Navigate to the parent folder so the file is visible in the listing.
+    const filesRoot = `${siteBase}/files`;
+    const lastSlash = parentPath.lastIndexOf("/");
+    const folderPath =
+      lastSlash > filesRoot.length
+        ? parentPath.substring(0, lastSlash)
+        : parentPath;
+    urlPath = folderPath.replace(siteBase, "");
+    mediaPreviewPath = nodePath;
   } else if (parentPath.startsWith(`${siteBase}/contents`)) {
     mode = "content-folders";
     urlPath = parentPath.replace(siteBase, "");
@@ -90,4 +99,21 @@ export function locateInJContent(nodePath: string, nodeType?: string): void {
   window.parent.dispatchEvent(
     new PopStateEvent("popstate", { state: { key: navKey } }),
   );
+
+  // For media files: open jContent's preview drawer for the located file.
+  // CM_DRAWER_STATES.SHOW = 2 (from jcontent redux/JContent.redux.js)
+  if (mediaPreviewPath) {
+    try {
+      window.parent.jahia?.reduxStore?.dispatch({
+        type: "CM_SET_PREVIEW_SELECTION",
+        payload: mediaPreviewPath,
+      });
+      window.parent.jahia?.reduxStore?.dispatch({
+        type: "CM_SET_PREVIEW_STATE",
+        payload: 2,
+      });
+    } catch {
+      // reduxStore may not be accessible in all contexts
+    }
+  }
 }
