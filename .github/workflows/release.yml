@@ -52,6 +52,6 @@ jobs:
       # Upload the OSGi JAR as a release asset so it can be downloaded directly
       # from the GitHub Releases page and deployed to Jahia.
       - name: Attach JAR to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: target/*.jar
+        run: gh release upload "${{ github.event.release.tag_name }}" target/*.jar
+        env:
+          GH_TOKEN: ${{ github.token }}
