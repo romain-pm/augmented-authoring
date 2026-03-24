@@ -1,55 +1,74 @@
-# Triggered on every push to main — builds the module and uploads the JAR as a
-# workflow artifact (90-day retention) so it can be retrieved without a release.
-name: On Merge to Main
+name: On merge to main
 
 on:
   push:
     branches:
       - main
     tags-ignore:
-      - "**"
+      - '**'
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  id-token: write
 
 jobs:
-  build:
-    name: Build & publish snapshot artifact
+  update-signature:
+    name: Update module signature
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Java 17 (Temurin)
-        uses: actions/setup-java@v4
+      - uses: jahia/jahia-modules-action/update-signature@v2
         with:
-          java-version: "17"
-          distribution: "temurin"
-          cache: "maven"
+          nexus_username: ${{ secrets.NEXUS_USERNAME }}
+          nexus_password: ${{ secrets.NEXUS_PASSWORD }}
 
-      - name: Set up Node LTS
-        uses: actions/setup-node@v4
+  build:
+    name: Build module
+    needs: update-signature
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/jahia/jahia-docker-mvn-cache:11-jdk-noble-mvn-loaded
+      credentials:
+        username: ${{ secrets.GH_PACKAGES_USERNAME }}
+        password: ${{ secrets.GH_PACKAGES_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: jahia/jahia-modules-action/build@v2
         with:
-          node-version: "lts/*"
+          mvn_settings_filepath: .github/maven-settings.xml
+          nexus_username: ${{ secrets.NEXUS_USERNAME }}
+          nexus_password: ${{ secrets.NEXUS_PASSWORD }}
+          tests_module_type: disabled
 
-      - name: Enable corepack (Yarn 4)
-        run: corepack enable
-
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
+  sbom:
+    name: SBOM processing
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: cyclonedx/cyclonedx-cli:0.24.2
+    steps:
+      - uses: jahia/jahia-modules-action/sbom-processing@v2
         with:
-          path: .yarn/cache
-          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
+          dependencytrack_hostname: ${{ vars.DEPENDENCYTRACK_HOSTNAME }}
+          dependencytrack_apikey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          sbom_artifacts: build-artifacts
 
-      - name: Build (mvn clean install)
-        run: mvn --batch-mode clean install -s .github/maven-settings.xml
-
-      - name: TypeScript type-check
-        run: npx tsc --noEmit
-
-      - name: Upload snapshot JAR
-        uses: actions/upload-artifact@v4
+  publish:
+    name: Publish module
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/jahia/jahia-docker-mvn-cache:11-jdk-noble-mvn-loaded
+      credentials:
+        username: ${{ secrets.GH_PACKAGES_USERNAME }}
+        password: ${{ secrets.GH_PACKAGES_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jahia/jahia-modules-action/publish@v2
         with:
-          name: kfind-snapshot-${{ github.sha }}
-          path: target/*.jar
-          retention-days: 90
+          nexus_username: ${{ secrets.NEXUS_USERNAME }}
+          nexus_password: ${{ secrets.NEXUS_PASSWORD }}

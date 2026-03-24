@@ -1,55 +1,30 @@
-# Triggered on every pull request — builds the module and runs a type-check.
 name: On PR
 
 on:
   pull_request:
     types: [opened, reopened, synchronize]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  id-token: write
 
 jobs:
   build:
-    name: Build & type-check
+    name: Build module
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/jahia/jahia-docker-mvn-cache:11-jdk-noble-mvn-loaded
+      credentials:
+        username: ${{ secrets.GH_PACKAGES_USERNAME }}
+        password: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Java 17 (Temurin)
-        uses: actions/setup-java@v4
+      - run: corepack enable
+      - uses: jahia/jahia-modules-action/build@v2
         with:
-          java-version: "17"
-          distribution: "temurin"
-          cache: "maven"
-
-      - name: Set up Node LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version: "lts/*"
-
-      # Yarn 4 is activated via corepack; the lockfile and .yarnrc.yml pin the
-      # exact behaviour (nodeLinker: node-modules).
-      - name: Enable corepack (Yarn 4)
-        run: corepack enable
-
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: .yarn/cache
-          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
-
-      # Full Maven build: runs `yarn install` + `yarn build` (via exec-maven-plugin)
-      # then compiles and packages the OSGi bundle.
-      - name: Build (mvn clean install)
-        run: mvn --batch-mode clean install -s .github/maven-settings.xml
-
-      - name: TypeScript type-check
-        run: npx tsc --noEmit
-
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kfind-${{ github.sha }}
-          path: target/*.jar
-          retention-days: 7
+          mvn_settings_filepath: .github/maven-settings.xml
+          nexus_username: ${{ secrets.NEXUS_USERNAME }}
+          nexus_password: ${{ secrets.NEXUS_PASSWORD }}
+          tests_module_type: disabled
