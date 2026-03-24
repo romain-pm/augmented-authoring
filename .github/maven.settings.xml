@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maven settings for CI — adds the public Jahia Nexus so Maven can resolve
+  the org.jahia.modules:jahia-modules parent POM (not in Maven Central).
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0
+                              https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <profiles>
+    <profile>
+      <id>jahia-public</id>
+      <repositories>
+        <repository>
+          <id>jahia-public</id>
+          <name>Jahia Public Repository</name>
+          <url>https://devtools.jahia.com/nexus/content/groups/public</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>jahia-public-plugins</id>
+          <name>Jahia Public Plugin Repository</name>
+          <url>https://devtools.jahia.com/nexus/content/groups/public</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>jahia-public</activeProfile>
+  </activeProfiles>
+</settings>
