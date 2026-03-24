@@ -1,10 +1,11 @@
 {
   "name": "kfinder",
-  "comment-for-name": "do not use kfind otherwise it blocks the rendering of the ui",
+  "comment-for-name": "do not use kfind for package name otherwise it blocks the rendering of the ui",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "build:dev": "vite build --mode development"
   },
   "dependencies": {
     "@apollo/client": "^3.11.0",

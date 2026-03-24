@@ -15,10 +15,10 @@ else
   exit 1
 fi
 
-echo "==> Building module..."
+echo "==> Building module (dev)..."
 cd "$SCRIPT_DIR"
 t_build=$(date +%s)
-mvn -T 8 clean install -q
+mvn clean install -P dev -q
 echo "==> Build done in $(elapsed $t_build)"
 
 JAR="$(ls "$SCRIPT_DIR"/target/kfind-*.jar 2>/dev/null | grep -v sources | head -1)"
