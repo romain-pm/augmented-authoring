@@ -35,6 +35,9 @@ jobs:
         password: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - run: corepack enable
       - uses: jahia/jahia-modules-action/build@v2
         with:
@@ -42,7 +45,6 @@ jobs:
           nexus_username: ${{ secrets.NEXUS_USERNAME }}
           nexus_password: ${{ secrets.NEXUS_PASSWORD }}
           tests_module_type: disabled
-          node_version: 24
   sbom:
     name: SBOM processing
     needs: build
