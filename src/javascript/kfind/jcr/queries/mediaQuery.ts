@@ -1,37 +1,4 @@
 import { gql } from "@apollo/client";
-import { buildJcrSql2 } from "./jcrQueryUtils.ts";
-
-export const JCR_MEDIA_SEARCH_QUERY = gql`
-  query JCRMediaSearch(
-    $query: String!
-    $limit: Int!
-    $offset: Int!
-    $language: String!
-  ) {
-    jcr(workspace: EDIT) {
-      nodesByQuery(
-        query: $query
-        limit: $limit
-        offset: $offset
-        language: $language
-      ) {
-        edges {
-          node {
-            displayName(language: $language)
-            name
-            path
-            uuid
-            workspace
-            primaryNodeType {
-              name
-            }
-            thumbnailUrl(name: "thumbnail", checkIfExists: true)
-          }
-        }
-      }
-    }
-  }
-`;
 
 export const JCR_MEDIA_BY_CRITERIA_QUERY = gql`
   query JCRMediaByCriteria(
@@ -73,6 +40,3 @@ export const JCR_MEDIA_BY_CRITERIA_QUERY = gql`
     }
   }
 `;
-
-export const buildMediaSql2 = (searchTerm: string, sitePath: string): string =>
-  buildJcrSql2("jnt:file", searchTerm, sitePath);

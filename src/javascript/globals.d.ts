@@ -8,7 +8,6 @@ declare interface Window {
     kfind?: {
       /** Server-rendered build/request timestamp from kfind.jsp. */
       buildTime?: string;
-      typeOfJCRGraphQL?: "nodesByQuery" | "nodesByCriteria";
       /** Minimum characters before a content search query is fired. Default: 3. */
       minSearchChars?: number;
       /** Number of results shown per section before clicking "show more". Default: 5. */

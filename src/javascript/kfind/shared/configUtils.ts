@@ -25,10 +25,6 @@ export function getJcrFindDelay(): number {
   );
 }
 
-export function getJcrQueryType(): "nodesByQuery" | "nodesByCriteria" {
-  return window.contextJsParameters.kfind?.typeOfJCRGraphQL ?? "nodesByQuery";
-}
-
 export function isUiFeaturesEnabled(): boolean {
   return window.contextJsParameters.kfind?.uiFeaturesEnabled !== false;
 }

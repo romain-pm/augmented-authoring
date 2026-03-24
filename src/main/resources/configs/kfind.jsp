@@ -7,7 +7,6 @@
 <c:choose>
     <c:when test="${! empty kfindConfig}">
         contextJsParameters.kfind={buildTime:"<%= buildTime %>",
-            typeOfJCRGraphQL:"${kfindConfig['typeOfJCRGraphQL']}",
             minSearchChars:${kfindConfig['minSearchChars']},
             defaultDisplayedResults:${kfindConfig['defaultDisplayedResults']},
             augmentedFindDelayInTypingToLaunchSearch:${kfindConfig['augmentedFindDelayInTypingToLaunchSearch']},

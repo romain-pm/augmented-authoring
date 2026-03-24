@@ -30,7 +30,7 @@ The modal displays results in up to six sections, each powered by an independent
 
 **Augmented Search** — When the site has a search index (`jmix:augmentedSearchIndexableSite` mixin), queries Jahia's Elasticsearch-backed augmented-search endpoint for pages, main resources, and documents. Supports server-side pagination and returns highlighted HTML excerpts.
 
-**JCR Pages** — Fallback when augmented search is unavailable. Queries for `jnt:page` nodes via JCR GraphQL (`nodesByCriteria` or `nodesByQuery` depending on configuration).
+**JCR Pages** — Fallback when augmented search is unavailable. Queries for `jnt:page` nodes via JCR GraphQL `nodesByCriteria`.
 
 **JCR Main Resources** — Fallback when augmented search is unavailable. Queries for nodes with the `jmix:mainResource` mixin (full-page content items).
 
@@ -56,22 +56,21 @@ The module registers itself via `@jahia/ui-extender` at app startup. Because the
 
 All settings are defined in the OSGi configuration file `org.jahia.pm.modules.kfind.cfg` and injected at runtime into `window.contextJsParameters.kfind` via a JSP filter.
 
-| Property                                   | Default           | Description                                          |
-| ------------------------------------------ | ----------------- | ---------------------------------------------------- |
-| `minSearchChars`                           | 3                 | Minimum characters before search fires               |
-| `defaultDisplayedResults`                  | 5                 | Initial results per section before "Show more"       |
-| `augmentedFindDelayInTypingToLaunchSearch` | 300               | Debounce delay in ms (augmented search)              |
-| `jcrFindDelayInTypingToLaunchSearch`       | 300               | Debounce delay in ms (JCR fallback)                  |
-| `typeOfJCRGraphQL`                         | `nodesByCriteria` | JCR query mode (`nodesByCriteria` or `nodesByQuery`) |
-| `uiFeaturesEnabled`                        | true              | Show UI Features section                             |
-| `uiFeaturesMaxResults`                     | 2                 | Max features displayed initially                     |
-| `jcrMediaEnabled`                          | true              | Show Media section                                   |
-| `jcrMediaMaxResults`                       | 2                 | Max media results initially                          |
-| `jcrPagesEnabled`                          | true              | Show JCR Pages section (when augmented unavailable)  |
-| `jcrPagesMaxResults`                       | 4                 | Max page results initially                           |
-| `jcrMainResourcesEnabled`                  | true              | Show JCR Main Resources section                      |
-| `jcrMainResourcesMaxResults`               | 4                 | Max main resource results initially                  |
-| `urlReverseLookupEnabled`                  | true              | Enable URL → node resolution                         |
+| Property                                   | Default | Description                                         |
+| ------------------------------------------ | ------- | --------------------------------------------------- |
+| `minSearchChars`                           | 3       | Minimum characters before search fires              |
+| `defaultDisplayedResults`                  | 5       | Initial results per section before "Show more"      |
+| `augmentedFindDelayInTypingToLaunchSearch` | 300     | Debounce delay in ms (augmented search)             |
+| `jcrFindDelayInTypingToLaunchSearch`       | 300     | Debounce delay in ms (JCR fallback)                 |
+| `uiFeaturesEnabled`                        | true    | Show UI Features section                            |
+| `uiFeaturesMaxResults`                     | 2       | Max features displayed initially                    |
+| `jcrMediaEnabled`                          | true    | Show Media section                                  |
+| `jcrMediaMaxResults`                       | 2       | Max media results initially                         |
+| `jcrPagesEnabled`                          | true    | Show JCR Pages section (when augmented unavailable) |
+| `jcrPagesMaxResults`                       | 4       | Max page results initially                          |
+| `jcrMainResourcesEnabled`                  | true    | Show JCR Main Resources section                     |
+| `jcrMainResourcesMaxResults`               | 4       | Max main resource results initially                 |
+| `urlReverseLookupEnabled`                  | true    | Enable URL → node resolution                        |
 
 ## Internationalization
 
@@ -96,4 +95,4 @@ A Java GraphQL extension (`KFindQueryExtensions`) adds a `urlReverseLookup(url, 
 
 ## Security
 
-User input in JCR-SQL2 queries is escaped via `escapeJcrSql2()` to prevent injection. HTML excerpts from search results are sanitized with `sanitizeHtml()`, which strips scripts, iframes, event handlers, and dangerous tags. No credentials are stored in source code.
+HTML excerpts from search results are sanitized with `sanitizeHtml()`, which strips scripts, iframes, event handlers, and dangerous tags. No credentials are stored in source code.

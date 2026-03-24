@@ -1,5 +1,4 @@
 import { gql } from "@apollo/client";
-import { buildJcrSql2 } from "./jcrQueryUtils.ts";
 
 export const JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY = gql`
   query JCRMainResourcesByCriteria(
@@ -40,8 +39,3 @@ export const JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY = gql`
     }
   }
 `;
-
-export const buildMainResourcesSql2 = (
-  searchTerm: string,
-  sitePath: string,
-): string => buildJcrSql2("jmix:mainResource", searchTerm, sitePath);

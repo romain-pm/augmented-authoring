@@ -18,9 +18,10 @@
 import { useEffect, useRef } from "react";
 import { useIsAugmentedAvailable } from "./useIsAugmentedAvailable.ts";
 import { useAugmentedSearch } from "../augmented/useAugmentedSearch.ts";
-import { useJcrSearch } from "../jcr/useJcrSearch.ts";
-import { useJcrMediaSearch } from "../jcr/useJcrMediaSearch.ts";
-import { useJcrMainResourcesSearch } from "../jcr/useJcrMainResourcesSearch.ts";
+import { useJcrSearchDriver } from "../jcr/useJcrSearchDriver.ts";
+import { JCR_NODES_BY_CRITERIA_QUERY } from "../jcr/queries/pagesQuery.ts";
+import { JCR_MEDIA_BY_CRITERIA_QUERY } from "../jcr/queries/mediaQuery.ts";
+import { JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY } from "../jcr/queries/mainResourcesQuery.ts";
 import { useFeatureSearch } from "../features/useFeatureSearch.ts";
 import { useUrlReverseLookup } from "../urlReverseLookup/useUrlReverseLookup.ts";
 import type { ContentSearchDriver } from "./searchTypes.ts";
@@ -93,12 +94,12 @@ export const useSearchOrchestration = (
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Instantiate all drivers (hooks must be called unconditionally) ──
-
-  // ── Instantiate all drivers (hooks must be called unconditionally) ──
   const augmentedRaw = useAugmentedSearch();
-  const jcrMediaRaw = useJcrMediaSearch();
-  const jcrPagesRaw = useJcrSearch();
-  const jcrMainResourcesRaw = useJcrMainResourcesSearch();
+  const jcrMediaRaw = useJcrSearchDriver(JCR_MEDIA_BY_CRITERIA_QUERY);
+  const jcrPagesRaw = useJcrSearchDriver(JCR_NODES_BY_CRITERIA_QUERY);
+  const jcrMainResourcesRaw = useJcrSearchDriver(
+    JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY,
+  );
   /** Feature search is synchronous — filters the Jahia UI registry in-memory. */
   const featureHits = useFeatureSearch(searchValue);
   /** URL reverse lookup — resolves pasted live URLs to JCR nodes. */
