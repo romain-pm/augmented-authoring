@@ -1,36 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Maven settings for CI — adds the public Jahia Nexus so Maven can resolve
-  the org.jahia.modules:jahia-modules parent POM (not in Maven Central).
--->
 <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0
                               https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <servers>
+    <server>
+      <id>jahia-enterprise</id>
+      <username>${env.NEXUS_USERNAME}</username>
+      <password>${env.NEXUS_PASSWORD}</password>
+    </server>
+    <server>
+      <id>jahia-releases</id>
+      <username>${env.NEXUS_USERNAME}</username>
+      <password>${env.NEXUS_PASSWORD}</password>
+    </server>
+    <server>
+      <id>jahia-internal</id>
+      <username>${env.NEXUS_USERNAME}</username>
+      <password>${env.NEXUS_PASSWORD}</password>
+    </server>
+    <server>
+      <id>jahia-snapshots</id>
+      <username>${env.NEXUS_USERNAME}</username>
+      <password>${env.NEXUS_PASSWORD}</password>
+    </server>
+  </servers>
   <profiles>
     <profile>
-      <id>jahia-public</id>
+      <id>jahia-internal-repository</id>
       <repositories>
         <repository>
-          <id>jahia-public</id>
-          <name>Jahia Public Repository</name>
-          <url>https://devtools.jahia.com/nexus/content/groups/public</url>
-          <releases><enabled>true</enabled></releases>
-          <snapshots><enabled>true</enabled></snapshots>
+          <snapshots><enabled>false</enabled></snapshots>
+          <id>central</id>
+          <name>Central Repository</name>
+          <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
+          <id>jahia-internal</id>
+          <name>Jahia Internal Repository</name>
+          <url>https://devtools.jahia.com/nexus/content/groups/internal/</url>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
         </repository>
       </repositories>
-      <pluginRepositories>
-        <pluginRepository>
-          <id>jahia-public-plugins</id>
-          <name>Jahia Public Plugin Repository</name>
-          <url>https://devtools.jahia.com/nexus/content/groups/public</url>
-          <releases><enabled>true</enabled></releases>
-          <snapshots><enabled>true</enabled></snapshots>
-        </pluginRepository>
-      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>sonar</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <sonar.host.url>${env.SONAR_URL}</sonar.host.url>
+        <sonar.login>${env.SONAR_TOKEN}</sonar.login>
+      </properties>
     </profile>
   </profiles>
   <activeProfiles>
-    <activeProfile>jahia-public</activeProfile>
+    <activeProfile>jahia-internal-repository</activeProfile>
   </activeProfiles>
 </settings>
