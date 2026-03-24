@@ -1,0 +1,8 @@
+- addMavenRepository: 'https://devtools.jahia.com/nexus/content/groups/enterprise/@id=jahia-enterprise@snapshots'
+  username: 'NEXUS_USERNAME'
+  password: 'NEXUS_PASSWORD'
+- installBundle:
+      - 'mvn:org.jahia.pm.modules/kfind'
+      - 'mvn:org.jahia.test/kfind-test-module'
+  autoStart: true
+  uninstallPreviousVersion: true
