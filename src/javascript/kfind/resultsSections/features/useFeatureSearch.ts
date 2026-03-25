@@ -17,19 +17,37 @@ import type { FeatureHit } from "../../shared/searchTypes.ts";
 import { getSiteKey, getSearchLanguage } from "../../shared/navigationUtils.ts";
 import { getMinSearchChars } from "../../shared/configUtils.ts";
 
+/** Static shortcuts that are always surfaced when the query matches. */
+const STATIC_FEATURES: FeatureHit[] = [
+  {
+    key: "manageModules",
+    label: "Module management UI",
+    path: "/cms/adminframe/default/en/settings.manageModules.html",
+  },
+];
+
 export function useFeatureSearch(query: string): FeatureHit[] {
   const { t } = useTranslation();
   return useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     if (trimmed.length < getMinSearchChars()) return [];
 
+    // Include static shortcuts that match the query before registry hits.
+    const staticHits = STATIC_FEATURES.filter(
+      (f) =>
+        f.label.toLowerCase().includes(trimmed) ||
+        f.key.toLowerCase().includes(trimmed),
+    );
+
     const registry = window.jahia?.uiExtender?.registry?.registry;
-    if (!registry) return [];
+    if (!registry) return staticHits;
 
     const results: FeatureHit[] = [];
     for (const entry of Object.values(registry)) {
       if (entry.type !== "adminRoute" && entry.type !== "jExperienceMenuEntry")
         continue;
+      // Skip registry entries that duplicate a static shortcut.
+      if (staticHits.some((s) => s.key === entry.key)) continue;
       const label = entry.label ? t(entry.label) : entry.key;
       if (
         label.toLowerCase().includes(trimmed) ||
@@ -54,7 +72,7 @@ export function useFeatureSearch(query: string): FeatureHit[] {
         results.push({ key: entry.key, label, path });
       }
     }
-    return results;
+    return [...staticHits, ...results];
     // t is stable across renders — intentionally excluded from deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
