@@ -7,13 +7,14 @@
  *
  * @see registerRoutes in routes.tsx for the actual bootstrap logic.
  */
-import { registry } from "@jahia/ui-extender";
-import { registerRoutes } from "./kfind/routes.tsx";
+import {registry} from '@jahia/ui-extender';
+import './kfind-drivers/registerAll.ts';
+import {registerRoutes} from './kfind/routes.tsx';
 
 export default function () {
-  registry.add("callback", "kfind", {
-    targets: ["jahiaApp-init:2"],
-    requireModuleInstalledOnSite: "kfind",
-    callback: registerRoutes,
-  });
+    registry.add('callback', 'kfind', {
+        targets: ['jahiaApp-init:2'],
+        requireModuleInstalledOnSite: 'kfind',
+        callback: registerRoutes
+    });
 }

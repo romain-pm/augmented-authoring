@@ -43,9 +43,11 @@ declare interface Window {
     edit: (opts: { path: string }) => void;
   };
   jahia?: {
+    /** Jahia's shared Apollo client — available before any module's registerRoutes fires. */
+    apolloClient?: import('@apollo/client').ApolloClient<import('@apollo/client').NormalizedCacheObject>;
     routerHistory?: { push: (path: string) => void; [k: string]: unknown };
     reduxStore?: {
-      dispatch: (action: { type: string; payload?: unknown }) => void;
+      dispatch: (action: unknown) => unknown;
     };
     uiExtender?: {
       registry?: {
@@ -68,7 +70,7 @@ declare interface Window {
 
 // __BUILD_TIME__ is no longer a compile-time define; build time is served via contextJsParameters.kfind.buildTime from the JSP
 
-declare module "*.module.css" {
+declare module '*.module.css' {
   const classes: { readonly [key: string]: string };
   export default classes;
 }

@@ -6,7 +6,9 @@
   "packageManager": "yarn@4.13.0",
   "scripts": {
     "build": "vite build",
-    "build:dev": "vite build --mode development"
+    "build:dev": "vite build --mode development",
+    "lint": "eslint --ext js,jsx,ts,tsx,json,cjs,mjs .",
+    "lint:fix": "yarn lint --fix"
   },
   "dependencies": {
     "@apollo/client": "^3.11.0",
@@ -20,10 +22,15 @@
     "react-i18next": "^11.2.2"
   },
   "devDependencies": {
+    "@jahia/eslint-config": "^2.2.0",
     "@jahia/vite-federation-plugin": "^0.1.1",
     "@types/prop-types": "^15",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/parser": "^8.51.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-json": "^4.0.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },

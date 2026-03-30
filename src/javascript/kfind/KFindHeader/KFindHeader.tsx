@@ -6,7 +6,7 @@
  *   - Bottom row: search input with clear button
  *
  * Keyboard handling:
- *   - ArrowDown from the input focuses the first result row.
+ *   - ArrowDown from the input focuses the first result item.
  *   - Enter fires a manual search trigger (for immediate re-query).
  *
  * The moonstone Input renders a clear button that is focusable by default;
@@ -20,13 +20,13 @@ import { getSiteKey, getSearchLanguage } from "../shared/navigationUtils.ts";
 import s from "./KFindHeader.module.css";
 
 type KFindHeaderProps = {
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-  onSearchClear: () => void;
-  onTriggerSearch: (value: string) => void;
-  focusOnField?: boolean;
-  scrollContainerRef: React.RefObject<HTMLDivElement>;
-  inputWrapperRef: React.RefObject<HTMLDivElement>;
+  readonly searchValue: string;
+  readonly onSearchChange: (value: string) => void;
+  readonly onSearchClear: () => void;
+  readonly onTriggerSearch: (value: string) => void;
+  readonly focusOnField?: boolean;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
+  readonly inputWrapperRef: React.RefObject<HTMLDivElement>;
 };
 
 export const KFindHeader = ({
@@ -43,7 +43,10 @@ export const KFindHeader = ({
   // Keep the moonstone clear button out of the tab order.
   useEffect(() => {
     const wrapper = inputWrapperRef.current;
-    if (!wrapper) return;
+    if (!wrapper) {
+      return;
+    }
+
     const patch = () => {
       wrapper
         .querySelectorAll<HTMLElement>(".moonstone-baseInput_clearButton")
@@ -51,11 +54,12 @@ export const KFindHeader = ({
           el.tabIndex = -1;
         });
     };
+
     patch();
     const observer = new MutationObserver(patch);
     observer.observe(wrapper, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, []);
+  }, [inputWrapperRef]);
 
   return (
     <div className={s.header}>
@@ -82,12 +86,14 @@ export const KFindHeader = ({
             if (e.key === "ArrowDown") {
               e.preventDefault();
               scrollContainerRef.current
-                ?.querySelector<HTMLElement>(".moonstone-tableRow[tabindex]")
+                ?.querySelector<HTMLElement>("[data-kfind-result][tabindex]")
                 ?.focus();
             }
           }}
           onKeyUp={(e) => {
-            if (e.key === "Enter") onTriggerSearch(searchValue);
+            if (e.key === "Enter") {
+              onTriggerSearch(searchValue);
+            }
           }}
           onClear={onSearchClear}
         />

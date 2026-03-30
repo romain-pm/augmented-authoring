@@ -1,0 +1,111 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2026-03-24T22:49:48.931Z",
+    "end": "2026-03-24T22:50:07.128Z",
+    "duration": 18197,
+    "testsRegistered": 1,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "205abcca-0f91-43a3-8aa1-bc690bd128fa",
+      "title": "",
+      "fullFile": "cypress/e2e/kfindModal.cy.ts",
+      "file": "cypress/e2e/kfindModal.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "0721fee8-456e-4c3b-ace9-82ce5043d671",
+          "title": "kFind modal",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "should open the kFind modal with Ctrl+K and display the search input",
+              "fullTitle": "kFind modal should open the kFind modal with Ctrl+K and display the search input",
+              "timedOut": null,
+              "duration": 17217,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": "[\n  \"videos/kfindModal.cy.ts.mp4\",\n  \"screenshots/kfindModal.cy.ts/kFind modal -- should open the kFind modal with Ctrl+K and display the search input (failed).png\"\n]",
+              "code": "cy.login();\n// Navigate to jContent for the test site\ncy.visit(\"/jahia/jcontent/\".concat(SITE_KEY, \"/en/pages\"));\n// Wait for jContent to fully load\ncy.get('body', { timeout: 30000 }).should('be.visible');\n// Trigger kFind modal via keyboard shortcut (Ctrl+K)\ncy.get('body').type('{ctrl}k');\n// The kFind modal should be visible — it uses Moonstone's Modal component\n// with the CSS class \"search-modal\"\ncy.get('.search-modal', { timeout: 10000 }).should('be.visible');\n// The modal should contain a search input field\ncy.get('.search-modal input[type=\"text\"]').should('be.visible');\n// The modal footer should contain the keyboard hint text\ncy.get('.search-modal').contains('Esc to close');\n// Close the modal with Escape\ncy.get('body').type('{esc}');\ncy.get('.search-modal').should('not.exist');",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `.search-modal`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `.search-modal`, but never found it.\n    at Context.eval (webpack://@jahia/kfind-cypress/./cypress/e2e/kfindModal.cy.ts:28:50)",
+                "diff": null
+              },
+              "uuid": "14488fa3-bfaf-4f53-8bb4-ec9869783b05",
+              "parentUUID": "0721fee8-456e-4c3b-ace9-82ce5043d671",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "14488fa3-bfaf-4f53-8bb4-ec9869783b05"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 17217,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "cypress",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "6.3.1"
+    },
+    "marge": {
+      "options": {
+        "id": "default",
+        "reportDir": "./results/reports/",
+        "reportFilename": "cypress",
+        "overwrite": false,
+        "html": false,
+        "json": true
+      },
+      "version": "5.2.0"
+    }
+  }
+}

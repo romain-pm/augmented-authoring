@@ -1,18 +1,18 @@
 /**
- * Generic result-row component used by every search table.
+ * Generic result-item component used by every search result list.
  *
  * Renders two or three lines depending on whether an excerpt is provided:
  * - Line 1: title (truncated at 80 chars)
  * - Line 2: type badge (Chip) + path
  * - Line 3 (optional): HTML excerpt with highlighted terms
  *
- * When no excerpt is present the row uses a compact height (56px vs 96px).
+ * When no excerpt is present the item uses a compact height (56px vs 96px).
  *
  * Keyboard:
  * - Enter / click → onAction (navigate to the node)
  * - E → onSecondaryAction (open content editor, if available)
- * - ArrowDown / ArrowUp → move focus between result rows
- * - ArrowUp on first row → return focus to the search input
+ * - ArrowDown / ArrowUp → move focus between result items
+ * - ArrowUp on first item → return focus to the search input
  */
 import React from "react";
 import {
@@ -20,28 +20,27 @@ import {
   Chip,
   Edit,
   Subdirectory,
-  TableRow,
   Tooltip,
   Typography,
 } from "@jahia/moonstone";
 import { useTranslation } from "react-i18next";
-import { sanitizeHtml } from "../shared/htmlUtils.ts";
 import s from "./ResultCard.module.css";
 
 const MAX_NAME_LENGTH = 80;
 
 type ResultCardProps = {
-  title: string;
-  type: string;
-  path: string;
-  excerpt?: string | null;
-  thumbnailUrl?: string | null;
+  readonly title: string;
+  readonly type: string;
+  readonly path: string;
+  readonly excerpt?: string | null;
+  readonly thumbnailUrl?: string | null;
+  readonly tabIndex?: number;
   /** Called when the row is clicked or Enter is pressed. */
-  onAction: () => void;
+  readonly onAction: () => void;
   /** Optional secondary action button (e.g. edit). Hidden by default, shown on hover. */
-  onSecondaryAction?: () => void;
-  scrollContainerRef: React.RefObject<HTMLDivElement>;
-  inputWrapperRef: React.RefObject<HTMLDivElement>;
+  readonly onSecondaryAction?: () => void;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
+  readonly inputWrapperRef: React.RefObject<HTMLDivElement>;
 };
 
 export const ResultCard = ({
@@ -50,6 +49,7 @@ export const ResultCard = ({
   path,
   excerpt,
   thumbnailUrl,
+  tabIndex = -1,
   onAction,
   onSecondaryAction,
   scrollContainerRef,
@@ -67,29 +67,35 @@ export const ResultCard = ({
       onAction();
       return;
     }
+
     if (onSecondaryAction && (e.key === "e" || e.key === "E")) {
       e.preventDefault();
       onSecondaryAction();
       return;
     }
+
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       const rows = Array.from(
         scrollContainerRef.current?.querySelectorAll<HTMLElement>(
-          ".moonstone-tableRow[tabindex]",
+          "[data-kfind-result][tabindex]",
         ) ?? [],
       );
       const idx = rows.indexOf(e.currentTarget as HTMLElement);
       const next = e.key === "ArrowDown" ? idx + 1 : idx - 1;
-      if (next >= 0 && next < rows.length) rows[next].focus();
-      else if (next < 0)
+      if (next >= 0 && next < rows.length) {
+        rows[next].focus();
+      } else if (next < 0) {
         inputWrapperRef.current?.querySelector<HTMLElement>("input")?.focus();
+      }
     }
   };
 
   return (
-    <TableRow
+    <li
+      data-kfind-result
       className={excerpt ? s.resultRow : s.resultRowCompact}
+      tabIndex={tabIndex}
       onClick={onAction}
       onKeyDown={handleKeyDown}
     >
@@ -110,9 +116,9 @@ export const ResultCard = ({
           </div>
           {excerpt && (
             <Typography variant="caption" className={s.resultRowExcerpt}>
-              <span
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(excerpt) }}
-              />
+              {/* Excerpt is sanitized upstream before rendering. */}
+              {/* eslint-disable-next-line react/no-danger */}
+              <span dangerouslySetInnerHTML={{ __html: excerpt }} />
             </Typography>
           )}
         </div>
@@ -146,6 +152,6 @@ export const ResultCard = ({
           )}
         </div>
       </div>
-    </TableRow>
+    </li>
   );
 };

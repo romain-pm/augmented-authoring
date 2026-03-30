@@ -61,11 +61,11 @@ if [[ "$CMD" == "test" ]]; then
   TESTS_ENV_FILE="$TESTS_DIR/.env"
   [[ ! -f "$TESTS_ENV_FILE" ]] && TESTS_ENV_FILE="$TESTS_DIR/.env.example"
 
-  # Export Cypress env vars derived from the already-loaded root .env
-  export CYPRESS_BASE_URL="${JAHIA_URL:-http://localhost:8080}"
-  export CYPRESS_JAHIA_URL="${JAHIA_URL:-http://localhost:8080}"
-  export CYPRESS_SUPER_USER_PASSWORD="${JAHIA_PASS:-root1234}"
+  # @jahia/cypress env plugin reads JAHIA_URL + SUPER_USER_PASSWORD (no CYPRESS_ prefix)
+  export JAHIA_URL="${JAHIA_URL:-http://localhost:8080}"
+  export SUPER_USER_PASSWORD="${JAHIA_PASS:-root1234}"
+  export CYPRESS_BASE_URL="$JAHIA_URL"
 
-  echo "==> Running Cypress tests against $CYPRESS_BASE_URL ..."
+  echo "==> Running Cypress tests against $JAHIA_URL ..."
   (cd "$TESTS_DIR" && yarn e2e:ci)
 fi

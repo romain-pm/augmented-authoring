@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="18.197" tests="1" failures="1">
+  <testsuite name="Root Suite" timestamp="2026-03-24T22:49:48" tests="0" file="cypress/e2e/kfindModal.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="kFind modal" timestamp="2026-03-24T22:49:48" tests="1" time="18.181" failures="1">
+    <testcase name="kFind modal should open the kFind modal with Ctrl+K and display the search input" time="0.000" classname="should open the kFind modal with Ctrl+K and display the search input">
+      <failure message="Timed out retrying after 10000ms: Expected to find element: `.search-modal`, but never found it." type="AssertionError"><![CDATA[AssertionError: Timed out retrying after 10000ms: Expected to find element: `.search-modal`, but never found it.
+    at Context.eval (webpack://@jahia/kfind-cypress/./cypress/e2e/kfindModal.cy.ts:28:50)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

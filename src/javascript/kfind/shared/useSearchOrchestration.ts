@@ -1,231 +1,436 @@
 /**
- * Central search orchestration hook.
+ * Central search orchestration hook — registry-driven.
  *
- * Manages **all** search drivers (features, augmented, JCR media/pages/main
- * resources) from a single place so KFindPanel stays a thin rendering layer.
+ * Reads all registered `kfindDriver` entries from the Jahia UI registry
+ * and manages their lifecycle generically. Has no knowledge of specific
+ * drivers (augmented, JCR, features, etc.).
  *
  * Responsibilities:
- * - Instantiates every search driver hook.
- * - Debounces user input (delay differs for augmented vs JCR).
- * - Waits for the augmented-search availability check before firing the
- *   first query (so we know which drivers to activate).
- * - Exposes a stable `triggerSearch()` for imperative re-fires (e.g. Enter).
- * - Provides per-driver pagination helpers (`loadNextPage`).
+ * - Reads `getRegisteredDrivers()` on mount, filters by `isEnabled()`,
+ *   creates `KFindResultsProvider` instances via `createSearchProvider(client)`.
+ * - Runs `checkAvailability()` for drivers that declare it.
+ * - Debounces user keystrokes with a single global timer.
+ * - Fires `search(query, 0)` on each active driver after debounce.
+ * - Manages per-driver state (hits, loading, hasMore, page) via `useReducer`.
+ * - Exposes pagination helpers (`loadNextPage`) per driver.
  *
- * @param searchValue - The raw (unTrimmed) value from the search input.
- * @returns SearchOrchestration object consumed by KFindPanel.
+ * @param searchValue — The raw (untrimmed) value from the search input.
  */
-import { useEffect, useRef } from "react";
-import { useIsAugmentedAvailable } from "./useIsAugmentedAvailable.ts";
-import { useAugmentedSearch } from "../resultsSections/augmented/useAugmentedSearch.ts";
-import { useJcrSearchDriver } from "../resultsSections/jcr/useJcrSearchDriver.ts";
-import { JCR_NODES_BY_CRITERIA_QUERY } from "../resultsSections/jcr/queries/pagesQuery.ts";
-import { JCR_MEDIA_BY_CRITERIA_QUERY } from "../resultsSections/jcr/queries/mediaQuery.ts";
-import { JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY } from "../resultsSections/jcr/queries/mainResourcesQuery.ts";
-import { useFeatureSearch } from "../resultsSections/features/useFeatureSearch.ts";
-import { useUrlReverseLookup } from "../resultsSections/urlReverseLookup/useUrlReverseLookup.ts";
-import type { ContentSearchDriver } from "./searchTypes.ts";
-import type { FeatureHit, SearchHit } from "./searchTypes.ts";
+import {useCallback, useEffect, useMemo, useReducer, useRef} from 'react';
 import {
-  getMinSearchChars,
-  getAugmentedFindDelay,
-  getJcrFindDelay,
-  isJcrMediaEnabled,
-  isJcrPagesEnabled,
-  isJcrMainResourcesEnabled,
-  isUrlReverseLookupEnabled,
-} from "./configUtils.ts";
+    getRegisteredDrivers,
+    type KFindDriver,
+    type KFindResultsProvider,
+    type SearchHit
+} from '../../kfind-drivers/types.ts';
+import {getMinSearchChars} from './configUtils.ts';
 
-/**
- * Wraps a ContentSearchDriver with a page counter and a
- * `loadNextPage` callback. This avoids duplicating pagination
- * logic for every driver in the orchestration hook.
- */
-type DriverWithPagination = {
-  driver: ContentSearchDriver;
-  pageRef: React.MutableRefObject<number>;
-  loadNextPage: () => void;
-};
-
-/** Creates pagination helpers around a raw ContentSearchDriver. */
-function useDriverPagination(
-  driver: ContentSearchDriver,
-  currentQueryRef: React.MutableRefObject<string>,
-): DriverWithPagination {
-  const pageRef = useRef(0);
-  const loadNextPage = () => {
-    if (driver.loading || !driver.hasMore || !currentQueryRef.current) return;
-    pageRef.current += 1;
-    driver.search(currentQueryRef.current, pageRef.current);
-  };
-  return { driver, pageRef, loadNextPage };
+// ── Debounce delay ──
+// A single global timer gates ALL drivers, so the UI doesn't flash intermediate
+// states while the user is still typing. The delay is configurable server-side
+// via kfind.jsp → window.contextJsParameters.kfind.jcrFindDelayInTypingToLaunchSearch.
+function getDebounceDelay(): number {
+    return (
+        window.contextJsParameters.kfind?.jcrFindDelayInTypingToLaunchSearch ?? 300
+    );
 }
 
-export type SearchOrchestration = {
-  isAugmented: boolean;
-  featureHits: FeatureHit[];
-  urlReverseLookupHit: SearchHit | null;
-  urlReverseLookupLoading: boolean;
-  augmented: DriverWithPagination;
-  jcrMedia: DriverWithPagination;
-  jcrPages: DriverWithPagination;
-  jcrMainResources: DriverWithPagination;
+// ── Per-driver state ──
+// Each driver gets its own independent state slice, keyed by the driver's
+// registry key (e.g. "kfind-jcr-media"). This allows each section to load,
+// paginate, and error independently.
+type DriverState = {
+  allHits: SearchHit[];
+  loading: boolean;
+  hasMore: boolean;
+  page: number;
+};
+
+const INITIAL_DRIVER_STATE: DriverState = {
+    allHits: [],
+    loading: false,
+    hasMore: false,
+    page: 0
+};
+
+// ── Reducer ──
+// All state mutations flow through this reducer so that batched dispatches
+// (e.g. multiple drivers completing around the same time) are handled atomically.
+type State = {
+  driverStates: Record<string, DriverState>;
+  currentQuery: string;
+  availabilityResolved: boolean;
+  driverAvailability: Record<string, boolean>;
+};
+
+type Action =
+  | { type: 'SEARCH_START'; key: string }
+  | {
+      type: 'SEARCH_SUCCESS';
+      key: string;
+      hits: SearchHit[];
+      hasMore: boolean;
+      page: number;
+    }
+  | { type: 'SEARCH_ERROR'; key: string }
+  | { type: 'SET_CURRENT_QUERY'; query: string }
+  | { type: 'RESET_ALL'; keys: string[] }
+  | { type: 'SET_AVAILABILITY'; key: string; available: boolean }
+  | { type: 'AVAILABILITY_COMPLETE' };
+
+function reducer(state: State, action: Action): State {
+    switch (action.type) {
+        case 'SEARCH_START':
+            return {
+                ...state,
+                driverStates: {
+                    ...state.driverStates,
+                    [action.key]: {
+                        ...(state.driverStates[action.key] ?? INITIAL_DRIVER_STATE),
+                        loading: true
+                    }
+                }
+            };
+        case 'SEARCH_SUCCESS': {
+            // On page 0: replace all hits (new search).
+            // On page N > 0: append to existing hits (pagination).
+            const prev = state.driverStates[action.key] ?? INITIAL_DRIVER_STATE;
+            const allHits =
+        action.page === 0 ?
+            action.hits :
+            [...prev.allHits, ...action.hits];
+            return {
+                ...state,
+                driverStates: {
+                    ...state.driverStates,
+                    [action.key]: {
+                        allHits,
+                        loading: false,
+                        hasMore: action.hasMore,
+                        page: action.page
+                    }
+                }
+            };
+        }
+
+        case 'SEARCH_ERROR':
+            return {
+                ...state,
+                driverStates: {
+                    ...state.driverStates,
+                    [action.key]: {
+                        ...(state.driverStates[action.key] ?? INITIAL_DRIVER_STATE),
+                        loading: false
+                    }
+                }
+            };
+        case 'SET_CURRENT_QUERY':
+            return {...state, currentQuery: action.query};
+        case 'RESET_ALL': {
+            const driverStates: Record<string, DriverState> = {};
+            for (const key of action.keys) {
+                driverStates[key] = INITIAL_DRIVER_STATE;
+            }
+
+            return {...state, driverStates, currentQuery: ''};
+        }
+
+        case 'SET_AVAILABILITY':
+            return {
+                ...state,
+                driverAvailability: {
+                    ...state.driverAvailability,
+                    [action.key]: action.available
+                }
+            };
+        case 'AVAILABILITY_COMPLETE':
+            return {...state, availabilityResolved: true};
+        default:
+            return state;
+    }
+}
+
+// ── Public types ──
+export type SearchOrchestrationResult = {
+  drivers: {
+    key: string;
+    registration: KFindDriver;
+    state: DriverState;
+    loadNextPage: () => void;
+  }[];
   currentQuery: string;
   triggerSearch: (value: string) => void;
 };
 
+// ── Hook ──
 export const useSearchOrchestration = (
-  searchValue: string,
-): SearchOrchestration => {
-  const {
-    isAugmented,
-    checkDone,
-    trigger: triggerAugmentedCheck,
-  } = useIsAugmentedAvailable();
-  // ── Keep mutable refs in sync so callbacks always read the latest value ──
-  const isAugmentedRef = useRef(isAugmented);
-  isAugmentedRef.current = isAugmented;
-  const checkDoneRef = useRef(checkDone);
-  checkDoneRef.current = checkDone;
+    searchValue: string
+): SearchOrchestrationResult => {
+    // ── 1. Discover and initialize drivers (once on mount) ──
+    // We use a ref (not state) because the driver list is stable for the
+    // component's lifetime — drivers are discovered from the registry once
+    // and never change. This avoids unnecessary re-renders.
+    const driversRef = useRef<
+    | {
+        key: string;
+        registration: KFindDriver;
+        provider: KFindResultsProvider;
+      }[]
+    | null
+  >(null);
 
-  /** Tracks the last query that was actually sent to drivers (for UI comparison). */
-  const currentQueryRef = useRef("");
-  /** Handle returned by setTimeout — cleared on each keystroke. */
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // ── Instantiate all drivers (hooks must be called unconditionally) ──
-  const augmentedRaw = useAugmentedSearch();
-  const jcrMediaRaw = useJcrSearchDriver(JCR_MEDIA_BY_CRITERIA_QUERY);
-  const jcrPagesRaw = useJcrSearchDriver(JCR_NODES_BY_CRITERIA_QUERY);
-  const jcrMainResourcesRaw = useJcrSearchDriver(
-    JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY,
-  );
-  /** Feature search is synchronous — filters the Jahia UI registry in-memory. */
-  const featureHits = useFeatureSearch(searchValue);
-  /** URL reverse lookup — resolves pasted live URLs to JCR nodes. */
-  const urlReverseLookup = useUrlReverseLookup();
-
-  // ── Wrap each driver with pagination helpers ──
-  const augmented = useDriverPagination(augmentedRaw, currentQueryRef);
-  const jcrMedia = useDriverPagination(jcrMediaRaw, currentQueryRef);
-  const jcrPages = useDriverPagination(jcrPagesRaw, currentQueryRef);
-  const jcrMainResources = useDriverPagination(
-    jcrMainResourcesRaw,
-    currentQueryRef,
-  );
-
-  /**
-   * Imperatively fire a search on all applicable drivers.
-   *
-   * Which drivers fire depends on:
-   * - Whether augmented search is available for this site.
-   * - Which tables are enabled in the OSGi cfg.
-   * - Whether the query meets the minimum character threshold.
-   *
-   * Media always fires (independent of augmented).
-   * Augmented vs JCR Pages/Main Resources are mutually exclusive.
-   */
-  const triggerSearch = (value: string) => {
-    const trimmed = value.trim();
-    if (trimmed.length < getMinSearchChars() || !checkDoneRef.current) return;
-    currentQueryRef.current = trimmed;
-
-    // URL reverse lookup — fire when the input looks like a URL
-    if (isUrlReverseLookupEnabled() && looksLikeUrl(trimmed)) {
-      urlReverseLookup.search(trimmed);
-    } else {
-      urlReverseLookup.reset();
+    if (driversRef.current === null) {
+        const client = window.jahia?.apolloClient ?? null;
+        const all = getRegisteredDrivers().filter(d => d.isEnabled());
+        driversRef.current = all.map(reg => ({
+            key: (reg as unknown as { key: string }).key,
+            registration: reg,
+            provider: client ? reg.createSearchProvider(client) : {search: () => Promise.resolve({hits: [], hasMore: false}), reset: () => {}}
+        }));
     }
 
-    if (isJcrMediaEnabled()) {
-      jcrMedia.pageRef.current = 0;
-      jcrMediaRaw.search(trimmed, 0);
-    }
+    const drivers = driversRef.current;
+    const driverKeys = useMemo(() => drivers.map(d => d.key), [drivers]);
 
-    if (isAugmentedRef.current) {
-      augmented.pageRef.current = 0;
-      augmentedRaw.search(trimmed, 0);
-    } else {
-      if (isJcrPagesEnabled()) {
-        jcrPages.pageRef.current = 0;
-        jcrPagesRaw.search(trimmed, 0);
-      }
-      if (isJcrMainResourcesEnabled()) {
-        jcrMainResources.pageRef.current = 0;
-        jcrMainResourcesRaw.search(trimmed, 0);
-      }
-    }
-  };
+    // ── 2. State ──
+    const initialState: State = useMemo(() => {
+        const driverStates: Record<string, DriverState> = {};
+        for (const key of driverKeys) {
+            driverStates[key] = INITIAL_DRIVER_STATE;
+        }
 
-  /** Clears results and pagination state for every driver. */
-  const resetAll = () => {
-    augmentedRaw.reset();
-    jcrMediaRaw.reset();
-    jcrPagesRaw.reset();
-    jcrMainResourcesRaw.reset();
-    urlReverseLookup.reset();
-    currentQueryRef.current = "";
-  };
+        // Optimistically mark as resolved if no driver has checkAvailability.
+        const needsCheck = drivers.some(d => d.registration.checkAvailability);
+        return {
+            driverStates,
+            currentQuery: '',
+            availabilityResolved: !needsCheck,
+            driverAvailability: {}
+        };
+    }, [driverKeys, drivers]);
 
-  // ── Effect 1: React to the augmented-check completing ──
-  // Once the site index check completes, fire a search if the user already typed enough.
-  // This handles the race where the user types fast and the mixin check hasn't resolved yet.
-  useEffect(() => {
-    if (!checkDone) return;
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
-    if (searchValue.trim().length >= getMinSearchChars()) {
-      triggerSearch(searchValue);
-    }
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    // ── Mutable refs for callbacks ──
+    const stateRef = useRef(state);
+    stateRef.current = state;
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // ── 3. Availability checks ──
+    // Some drivers need an async check (e.g. "is augmented search enabled
+    // on this site?") before they can be shown. We defer these checks until
+    // the user first types enough characters — no wasted network requests
+    // if the modal is opened and closed without searching.
+    const availabilityTriggeredRef = useRef(false);
+
+    const triggerAvailabilityChecks = useCallback(() => {
+        if (availabilityTriggeredRef.current) {
+            return;
+        }
+
+        availabilityTriggeredRef.current = true;
+
+        const client = window.jahia?.apolloClient ?? null;
+        if (!client) {
+            dispatch({type: 'AVAILABILITY_COMPLETE'});
+            return;
+        }
+
+        const checks = drivers
+            .filter(d => d.registration.checkAvailability)
+            .map(d =>
+        d.registration.checkAvailability!(client).then(available => {
+            dispatch({type: 'SET_AVAILABILITY', key: d.key, available});
+        })
+            );
+
+        if (checks.length === 0) {
+            dispatch({type: 'AVAILABILITY_COMPLETE'});
+        } else {
+            Promise.all(checks).then(() => {
+                dispatch({type: 'AVAILABILITY_COMPLETE'});
+            });
+        }
+    }, [drivers]);
+
+    // ── 4. Search execution ──
+    const executeSearch = useCallback(
+        (query: string) => {
+            const trimmed = query.trim();
+            if (trimmed.length < getMinSearchChars()) {
+                return;
+            }
+
+            if (!stateRef.current.availabilityResolved) {
+                return;
+            }
+
+            dispatch({type: 'SET_CURRENT_QUERY', query: trimmed});
+
+            for (const d of drivers) {
+                // Skip drivers that failed availability check.
+                if (d.registration.checkAvailability) {
+                    const available = stateRef.current.driverAvailability[d.key];
+                    if (available === false) {
+                        continue;
+                    }
+
+                    // If availability hasn't been resolved yet for this specific driver, skip.
+                    if (available === undefined) {
+                        continue;
+                    }
+                }
+
+                // Skip drivers that can't handle this query.
+                if (d.registration.canHandle && !d.registration.canHandle(trimmed)) {
+                    continue;
+                }
+
+                dispatch({type: 'SEARCH_START', key: d.key});
+                d.provider
+                    .search(trimmed, 0)
+                    .then(result => {
+                        dispatch({
+                            type: 'SEARCH_SUCCESS',
+                            key: d.key,
+                            hits: result.hits,
+                            hasMore: result.hasMore,
+                            page: 0
+                        });
+                    })
+                    .catch(() => {
+                        dispatch({type: 'SEARCH_ERROR', key: d.key});
+                    });
+            }
+        },
+        [drivers]
+    );
+
+    // Stable ref for triggerSearch so effects don't re-fire.
+    const executeSearchRef = useRef(executeSearch);
+    executeSearchRef.current = executeSearch;
+
+    // Public imperative trigger (e.g. pressing Enter).
+    const triggerSearch = useCallback(
+        (value: string) => executeSearchRef.current(value),
+        []
+    );
+
+    // ── 5. Reset all drivers ──
+    const resetAll = useCallback(() => {
+        for (const d of drivers) {
+            d.provider.reset();
+        }
+
+        dispatch({type: 'RESET_ALL', keys: driverKeys});
+    }, [drivers, driverKeys]);
+
+    // ── 6. Effect: debounce keystrokes ──
+    useEffect(() => {
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+
+        if (searchValue.trim().length < getMinSearchChars()) {
+            resetAll();
+            return;
+        }
+
+        // Kick off availability checks the first time minChars is reached.
+        triggerAvailabilityChecks();
+
+        debounceRef.current = setTimeout(() => {
+            executeSearchRef.current(searchValue);
+        }, getDebounceDelay());
+
+        return () => {
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkDone]);
+    }, [searchValue]);
 
-  // ── Effect 2: Debounce user keystrokes ──
-  // Wait after the user stops typing before firing the query.
-  // The delay is shorter for augmented search (server-side indexing is faster).
-  // Also kicks off the site-index check the first time minSearchChars is reached
-  // so no GQL query fires before the user has typed enough.
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (searchValue.trim().length < getMinSearchChars()) {
-      resetAll();
-      return;
-    }
-    // Start the augmented-availability check now (idempotent — cached after first call).
-    triggerAugmentedCheck();
-    const delay = isAugmentedRef.current
-      ? getAugmentedFindDelay()
-      : getJcrFindDelay();
-    debounceRef.current = setTimeout(() => {
-      triggerSearch(searchValue);
-    }, delay);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+    // ── 7. Effect: re-fire search when availability resolves ──
+    // Availability checks are async — they may resolve AFTER the debounce
+    // already fired. When that happens, we re-fire the search so that
+    // newly-available drivers get their results too.
+    useEffect(() => {
+        if (!state.availabilityResolved) {
+            return;
+        }
+
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+            debounceRef.current = null;
+        }
+
+        if (searchValue.trim().length >= getMinSearchChars()) {
+            executeSearchRef.current(searchValue);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [state.availabilityResolved]);
+
+    // ── 8. Build active drivers for the consumer ──
+    // Filters out drivers that are disabled or failed their availability
+    // check, then wraps each surviving driver with its current state and
+    // a `loadNextPage` callback for client-driven pagination.
+    const activeDrivers: SearchOrchestrationResult['drivers'] = useMemo(() => {
+        return drivers
+            .filter(d => {
+                // Must be enabled (already filtered on mount, but defensive).
+                if (!d.registration.isEnabled()) {
+                    return false;
+                }
+
+                // If has availability check, must be resolved and true.
+                if (d.registration.checkAvailability) {
+                    const available = state.driverAvailability[d.key];
+                    if (available !== true) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })
+            .map(d => ({
+                key: d.key,
+                registration: d.registration,
+                state: state.driverStates[d.key] ?? INITIAL_DRIVER_STATE,
+                loadNextPage: () => {
+                    const ds = stateRef.current.driverStates[d.key];
+                    if (!ds || ds.loading || !ds.hasMore) {
+                        return;
+                    }
+
+                    const nextPage = ds.page + 1;
+                    const query = stateRef.current.currentQuery;
+                    if (!query) {
+                        return;
+                    }
+
+                    dispatch({type: 'SEARCH_START', key: d.key});
+                    d.provider
+                        .search(query, nextPage)
+                        .then(result => {
+                            dispatch({
+                                type: 'SEARCH_SUCCESS',
+                                key: d.key,
+                                hits: result.hits,
+                                hasMore: result.hasMore,
+                                page: nextPage
+                            });
+                        })
+                        .catch(() => {
+                            dispatch({type: 'SEARCH_ERROR', key: d.key});
+                        });
+                }
+            }));
+    }, [drivers, state.driverStates, state.driverAvailability]);
+
+    return {
+        drivers: activeDrivers,
+        currentQuery: state.currentQuery,
+        triggerSearch
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchValue]);
-
-  return {
-    isAugmented,
-    featureHits,
-    urlReverseLookupHit: urlReverseLookup.hit,
-    urlReverseLookupLoading: urlReverseLookup.loading,
-    augmented,
-    jcrMedia,
-    jcrPages,
-    jcrMainResources,
-    currentQuery: currentQueryRef.current,
-    triggerSearch,
-  };
 };
-
-/** Returns true if the input string looks like a URL (starts with http(s):// or contains a dot with path). */
-function looksLikeUrl(input: string): boolean {
-  if (input.startsWith("http://") || input.startsWith("https://")) return true;
-  if (input.startsWith("/") && input.length > 1) return true;
-  // e.g. "www.example.com/page" or "example.com/page"
-  if (/^[\w-]+\.[\w.-]+\//.test(input)) return true;
-  return false;
-}
