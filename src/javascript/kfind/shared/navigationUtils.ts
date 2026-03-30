@@ -105,6 +105,12 @@ export function pushRouteNavigation(path: string): void {
 function getParentReduxStore(): {
   dispatch: (action: unknown) => unknown;
 } | null {
+  // This MFE runs in an iframe and does not own the jContent Redux store.
+  // Navigation/state actions (jcontentGoto, preview drawer, table view mode)
+  // are handled by the parent Jahia shell store, so we intentionally bridge to
+  // `window.parent.jahia.reduxStore` when available.
+  // This is runtime-coupled and undocumented, hence the null-safe lookup and
+  // defensive dispatch wrappers around all calls.
   return window.parent.jahia?.reduxStore ?? null;
 }
 
