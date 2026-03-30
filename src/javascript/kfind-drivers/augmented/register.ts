@@ -27,7 +27,7 @@ import {
   locateInJContent,
 } from "../../kfind/shared/navigationUtils.ts";
 import { SEARCH_QUERY } from "./augmentedSearchQuery.ts";
-import { checkAugmentedAvailable } from "./checkAugmented.ts";
+import { checkAugmentedAvailable } from "../../kfind/shared/checkAugmentedAvailable.ts";
 
 const PAGE_SIZE = 10;
 
@@ -56,7 +56,9 @@ function createAugmentedSearchProvider(
 
       // Discard stale responses — a newer search may have started while
       // this network request was in-flight.
-      if (activeQuery !== query) return { hits: [], hasMore: false };
+      if (activeQuery !== query) {
+        return { hits: [], hasMore: false };
+      }
 
       const hits: SearchHit[] = result.data?.search?.results?.hits ?? [];
       const total = result.data?.search?.results?.totalHits ?? 0;

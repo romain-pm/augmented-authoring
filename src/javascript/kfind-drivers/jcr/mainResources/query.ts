@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import {gql} from '@apollo/client';
 
 export const JCR_MAIN_RESOURCES_BY_CRITERIA_QUERY = gql`
   query JCRMainResourcesByCriteria(

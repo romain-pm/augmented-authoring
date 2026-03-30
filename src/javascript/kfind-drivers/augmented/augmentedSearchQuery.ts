@@ -4,7 +4,7 @@
  * SEARCH_QUERY — full-text search with pagination and excerpt highlighting.
  * SITE_INDEX_QUERY — checks if a site node has the augmented-search mixin.
  */
-import { gql } from "@apollo/client";
+import {gql} from '@apollo/client';
 
 /** Full-text search via the augmented-search GraphQL endpoint. */
 export const SEARCH_QUERY = gql`

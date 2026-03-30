@@ -8,30 +8,30 @@
  * This factory avoids duplicating the search/pagination/stale-response logic
  * across three nearly-identical drivers.
  */
-import type { DocumentNode } from "@apollo/client";
+import type {DocumentNode} from '@apollo/client';
 import type {
-  ApolloClientInstance,
-  KFindResultsProvider,
-  SearchHit,
-} from "../types.ts";
-import type { GqlJcrNode } from "../searchTypes.ts";
+    ApolloClientInstance,
+    KFindResultsProvider,
+    SearchHit
+} from '../types.ts';
+import type {GqlJcrNode} from '../searchTypes.ts';
 import {
-  getSiteKey,
-  getSearchLanguage,
-} from "../../kfind/shared/navigationUtils.ts";
+    getSiteKey,
+    getSearchLanguage
+} from '../../kfind/shared/navigationUtils.ts';
 
 const PAGE_SIZE = 10;
 
 /** Maps a raw GraphQL JCR node to the driver-agnostic `SearchHit` shape. */
 export function jcrNodeToSearchHit(node: GqlJcrNode): SearchHit {
-  return {
-    id: node.uuid,
-    path: node.path,
-    displayableName: node.displayName || node.name,
-    excerpt: null,
-    nodeType: node.primaryNodeType.name,
-    thumbnailUrl: node.thumbnailUrl ?? null,
-  };
+    return {
+        id: node.uuid,
+        path: node.path,
+        displayableName: node.displayName || node.name,
+        excerpt: null,
+        nodeType: node.primaryNodeType.name,
+        thumbnailUrl: node.thumbnailUrl ?? null
+    };
 }
 
 /**
@@ -42,41 +42,43 @@ export function jcrNodeToSearchHit(node: GqlJcrNode): SearchHit {
  * handler silently drops results whose query no longer matches.
  */
 export function createJcrSearchProvider(
-  client: ApolloClientInstance,
-  queryDoc: DocumentNode,
+    client: ApolloClientInstance,
+    queryDoc: DocumentNode
 ): KFindResultsProvider {
-  let activeQuery = "";
+    let activeQuery = '';
 
-  return {
-    search: async (query, page) => {
-      activeQuery = query;
-      const sitePath = `/sites/${getSiteKey()}`;
+    return {
+        search: async (query, page) => {
+            activeQuery = query;
+            const sitePath = `/sites/${getSiteKey()}`;
 
-      const result = await client.query<{
+            const result = await client.query<{
         jcr: { nodesByCriteria: { nodes: GqlJcrNode[] } };
       }>({
-        query: queryDoc,
-        variables: {
-          searchTerm: query,
-          sitePath,
-          language: getSearchLanguage(),
-          limit: PAGE_SIZE,
-          offset: page * PAGE_SIZE,
-        },
-        fetchPolicy: "network-only",
+          query: queryDoc,
+          variables: {
+              searchTerm: query,
+              sitePath,
+              language: getSearchLanguage(),
+              limit: PAGE_SIZE,
+              offset: page * PAGE_SIZE
+          },
+          fetchPolicy: 'network-only'
       });
 
-      // Discard stale responses.
-      if (activeQuery !== query) return { hits: [], hasMore: false };
+            // Discard stale responses.
+            if (activeQuery !== query) {
+                return {hits: [], hasMore: false};
+            }
 
-      // Determine hasMore by checking if we received a full page — JCR's
-      // nodesByCriteria doesn't return totalHits, so this is the best heuristic.
-      const nodes = result.data?.jcr?.nodesByCriteria?.nodes ?? [];
-      const hits = nodes.map(jcrNodeToSearchHit);
-      return { hits, hasMore: hits.length === PAGE_SIZE };
-    },
-    reset: () => {
-      activeQuery = "";
-    },
-  };
+            // Determine hasMore by checking if we received a full page — JCR's
+            // nodesByCriteria doesn't return totalHits, so this is the best heuristic.
+            const nodes = result.data?.jcr?.nodesByCriteria?.nodes ?? [];
+            const hits = nodes.map(jcrNodeToSearchHit);
+            return {hits, hasMore: hits.length === PAGE_SIZE};
+        },
+        reset: () => {
+            activeQuery = '';
+        }
+    };
 }

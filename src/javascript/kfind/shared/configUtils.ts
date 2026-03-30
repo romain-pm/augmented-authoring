@@ -5,5 +5,5 @@
  */
 
 export function getMinSearchChars(): number {
-  return window.contextJsParameters.kfind?.minSearchChars ?? 3;
+    return window.contextJsParameters.kfind?.minSearchChars ?? 3;
 }

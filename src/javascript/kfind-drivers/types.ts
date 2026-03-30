@@ -27,8 +27,8 @@
  * for `useLazyQuery` or any hook-based API. The orchestration layer
  * manages all React state centrally via `useReducer`.
  */
-import { registry } from "@jahia/ui-extender";
-import type { ApolloClient, NormalizedCacheObject } from "@apollo/client";
+import {registry} from '@jahia/ui-extender';
+import type {ApolloClient, NormalizedCacheObject} from '@apollo/client';
 
 /** A single content search result (returned by both augmented search and JCR queries). */
 export type SearchHit = {
@@ -82,7 +82,7 @@ export type KFindResultsProvider = {
 export type KFindDriver = {
   /** Display order — lower values appear first. */
   priority: number;
-  /** i18n key for the section title. */
+  /** I18n key for the section title. */
   title: string;
   /** Fallback title when the i18n key is not resolved. */
   titleDefault: string;
@@ -120,8 +120,8 @@ export type KFindDriver = {
  * entries match the filter and they are all registered with the correct shape.
  */
 export function getRegisteredDrivers(): KFindDriver[] {
-  const entries = registry.find({ type: "kfindDriver" });
-  return (entries as unknown as KFindDriver[]).sort(
-    (a, b) => a.priority - b.priority,
-  );
+    const entries = registry.find({type: 'kfindDriver'});
+    return (entries as unknown as KFindDriver[]).sort(
+        (a, b) => a.priority - b.priority
+    );
 }

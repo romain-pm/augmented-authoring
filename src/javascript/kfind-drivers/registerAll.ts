@@ -12,9 +12,9 @@
  * Third-party Jahia modules can register additional drivers in their
  * own init callbacks — they don't need to modify this file.
  */
-import "./features/register.ts";
-import "./urlReverseLookup/register.ts";
-import "./augmented/register.ts";
-import "./jcr/media/register.ts";
-import "./jcr/pages/register.ts";
-import "./jcr/mainResources/register.ts";
+import './features/register.ts';
+import './urlReverseLookup/register.ts';
+import './augmented/register.ts';
+import './jcr/media/register.ts';
+import './jcr/pages/register.ts';
+import './jcr/mainResources/register.ts';

@@ -13,71 +13,71 @@
  *   4. Empty sections auto-hide; a global "no results" empty state
  *      appears only when ALL sections are empty after a completed query.
  */
-import React, { useCallback, useRef, useState } from "react";
-import { Close, EmptyData, Search } from "@jahia/moonstone";
-import { useTranslation } from "react-i18next";
-import { KFindHeader } from "../KFindHeader/KFindHeader.tsx";
-import { useSearchOrchestration } from "../shared/useSearchOrchestration.ts";
-import { ResultsSection } from "../ResultsSection/ResultsSection.tsx";
-import { getMinSearchChars } from "../shared/configUtils.ts";
-import styles from "../shared/layout.module.css";
-import s from "./KFindPanel.module.css";
+import {useCallback, useRef, useState} from 'react';
+import {Close, EmptyData, Search} from '@jahia/moonstone';
+import {useTranslation} from 'react-i18next';
+import {KFindHeader} from '../KFindHeader/KFindHeader.tsx';
+import {useSearchOrchestration} from '../shared/useSearchOrchestration.ts';
+import {ResultsSection} from '../ResultsSection/ResultsSection.tsx';
+import {getMinSearchChars} from '../shared/configUtils.ts';
+import styles from '../shared/layout.module.css';
+import s from './KFindPanel.module.css';
 
 type KFindPanelProps = {
-  focusOnField?: boolean;
-  onNavigate?: () => void;
+  readonly focusOnField?: boolean;
+  readonly onNavigate?: () => void;
 };
 
-export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
-  const { t } = useTranslation();
-  const [searchValue, setSearchValue] = useState("");
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const inputWrapperRef = useRef<HTMLDivElement>(null);
+export const KFindPanel = ({focusOnField, onNavigate}: KFindPanelProps) => {
+    const {t} = useTranslation();
+    const [searchValue, setSearchValue] = useState('');
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const inputWrapperRef = useRef<HTMLDivElement>(null);
 
-  const { drivers, currentQuery, triggerSearch } =
+    const {drivers, currentQuery, triggerSearch} =
     useSearchOrchestration(searchValue);
 
-  const trimmedQuery = searchValue.trim();
-  const minChars = getMinSearchChars();
+    const trimmedQuery = searchValue.trim();
+    const minChars = getMinSearchChars();
 
-  // Aggregate loading/results state across all drivers to decide whether
-  // to show the global "no results" empty state.
-  const isAnyLoading = drivers.some((d) => d.state.loading);
-  const hasAnyResults = drivers.some((d) => d.state.allHits.length > 0);
+    // Aggregate loading/results state across all drivers to decide whether
+    // to show the global "no results" empty state.
+    const isAnyLoading = drivers.some(d => d.state.loading);
+    const hasAnyResults = drivers.some(d => d.state.allHits.length > 0);
 
-  const showGlobalNoResults =
+    const showGlobalNoResults =
     trimmedQuery.length >= minChars &&
     currentQuery === trimmedQuery &&
     !isAnyLoading &&
     !hasAnyResults;
 
-  const handleSearchClear = useCallback(() => setSearchValue(""), []);
+    const handleSearchClear = useCallback(() => setSearchValue(''), []);
 
-  return (
-    <div className={s.panel}>
-      <KFindHeader
+    return (
+        <div className={s.panel}>
+            <KFindHeader
         searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        onSearchClear={handleSearchClear}
-        onTriggerSearch={triggerSearch}
         focusOnField={focusOnField}
         scrollContainerRef={scrollContainerRef}
         inputWrapperRef={inputWrapperRef}
+        onSearchChange={setSearchValue}
+        onSearchClear={handleSearchClear}
+        onTriggerSearch={triggerSearch}
       />
 
-      <div ref={scrollContainerRef} className={styles.scrollContainer}>
-        {/* ── Empty state ── */}
-        {trimmedQuery.length < minChars && !hasAnyResults && (
-          <EmptyData
-            icon={<Search size="big" />}
-            title={t("search.empty.title", "Find anything.")}
-            message={t("search.empty.hint", { min: minChars })}
+            <div ref={scrollContainerRef} className={styles.scrollContainer}>
+                {/* ── Empty state ── */}
+                {trimmedQuery.length < minChars && !hasAnyResults && (
+                <EmptyData
+            icon={<Search size="big"/>}
+            title={t('search.empty.title', 'Find anything.')}
+            message={t('search.empty.hint', {min: minChars})}
           />
         )}
 
-        {/* ── Result sections — one per active driver ── */}
-        {drivers.map(({ key, registration, state, loadNextPage }) => (
-          <ResultsSection
+                {/* ── Result sections — one per active driver ── */}
+                {drivers.map(({key, registration, state, loadNextPage}) => (
+                    <ResultsSection
             key={key}
             title={t(registration.title, registration.titleDefault)}
             hits={state.allHits}
@@ -87,32 +87,28 @@ export const KFindPanel = ({ focusOnField, onNavigate }: KFindPanelProps) => {
             trimmedQuery={trimmedQuery}
             scrollContainerRef={scrollContainerRef}
             inputWrapperRef={inputWrapperRef}
-            onHitAction={(hit) => {
+            onHitAction={hit => {
               registration.locate(hit);
               onNavigate?.();
             }}
-            onSecondaryAction={
-              registration.edit
-                ? (hit) => registration.edit!(hit)
-                : undefined
-            }
+            onSecondaryAction={registration.edit ? hit => registration.edit!(hit) : undefined}
             onLoadMore={loadNextPage}
           />
         ))}
 
-        {/* ── Global "no results" — shown only when every visible section is empty ── */}
-        {showGlobalNoResults && (
-          <EmptyData
-            icon={<Close />}
-            title={t("search.noResults.title", "No results.")}
+                {/* ── Global "no results" — shown only when every visible section is empty ── */}
+                {showGlobalNoResults && (
+                <EmptyData
+            icon={<Close/>}
+            title={t('search.noResults.title', 'No results.')}
             message={t(
-              "search.noResults.hint",
+              'search.noResults.hint',
               'Nothing matched "{{q}}". Try different keywords or check for typos.',
-              { q: trimmedQuery },
+              {q: trimmedQuery}
             )}
           />
         )}
-      </div>
-    </div>
-  );
+            </div>
+        </div>
+    );
 };
