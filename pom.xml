@@ -18,7 +18,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <!--<jahia-module-type>system</jahia-module-type>-->
+        <jahia-module-type>templatesSet</jahia-module-type>
         <!--<require-capability>osgi.extender;filter:="(osgi.extender=org.jahia.bundles.blueprint.extender.config)"</require-capability> -->
         <jahia-depends>default,graphql-dxm-provider</jahia-depends>
     </properties>
