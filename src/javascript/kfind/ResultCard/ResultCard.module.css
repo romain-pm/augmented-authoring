@@ -8,6 +8,11 @@
   cursor: pointer;
 }
 
+.resultRow:hover,
+.resultRowCompact:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
 .resultRow:focus-visible,
 .resultRowCompact:focus-visible {
   outline: 2px solid var(--color-accent_light) !important;
