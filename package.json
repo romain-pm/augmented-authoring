@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.11.0",
-    "@jahia/moonstone": "file:./vendor/jahia-moonstone-2.17.5.tgz",
+    "@jahia/moonstone": "^2.17.5",
     "@jahia/ui-extender": "^1.2.0",
     "graphql": "^16.13.1",
     "i18next": "^20.6.1",

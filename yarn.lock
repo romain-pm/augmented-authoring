@@ -1635,12 +1635,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jahia/moonstone@file:./vendor/jahia-moonstone-2.17.5.tgz::locator=kfinder%40workspace%3A.":
+"@jahia/moonstone@npm:^2.17.5":
   version: 2.17.5
-  resolution: "@jahia/moonstone@file:./vendor/jahia-moonstone-2.17.5.tgz#./vendor/jahia-moonstone-2.17.5.tgz::hash=066cec&locator=kfinder%40workspace%3A."
+  resolution: "@jahia/moonstone@npm:2.17.5"
   dependencies:
     "@floating-ui/react": "npm:^0.27.16"
-    "@tanstack/react-table": "npm:^8.21.3"
     clsx: "npm:^2.1.1"
     re-resizable: "npm:^6.11.2"
     to-px: "npm:^1.1.0"
@@ -1648,7 +1647,7 @@ __metadata:
     react: ^18.3.1
     react-dom: ^18.3.1
     react-table: ^7.8.0
-  checksum: 10c0/5644e55a5f2ff8d292ae27459a4ca0c7043cd025ade7919912af7ddd3dab36d793a7557195a7e101f7bb43032cd3bfab427d444b9f1e32920bfed2db360c6003
+  checksum: 10c0/0d78986b5ae5009f9107cfef3763791e78d1f65ac509bcf4abbdd71bd62ba1b4780016b349bb7c12fd987cd8a2903bbdc09ef06ccd535afcfaf648e01872a943
   languageName: node
   linkType: hard
 
@@ -2074,25 +2073,6 @@ __metadata:
   version: 1.1.0
   resolution: "@rtsao/scc@npm:1.1.0"
   checksum: 10c0/b5bcfb0d87f7d1c1c7c0f7693f53b07866ed9fec4c34a97a8c948fb9a7c0082e416ce4d3b60beb4f5e167cbe04cdeefbf6771320f3ede059b9ce91188c409a5b
-  languageName: node
-  linkType: hard
-
-"@tanstack/react-table@npm:^8.21.3":
-  version: 8.21.3
-  resolution: "@tanstack/react-table@npm:8.21.3"
-  dependencies:
-    "@tanstack/table-core": "npm:8.21.3"
-  peerDependencies:
-    react: ">=16.8"
-    react-dom: ">=16.8"
-  checksum: 10c0/85d1d0fcb690ecc011f68a5a61c96f82142e31a0270dcf9cbc699a6f36715b1653fe6ff1518302a6d08b7093351fc4cabefd055a7db3cd8ac01e068956b0f944
-  languageName: node
-  linkType: hard
-
-"@tanstack/table-core@npm:8.21.3":
-  version: 8.21.3
-  resolution: "@tanstack/table-core@npm:8.21.3"
-  checksum: 10c0/40e3560e6d55e07cc047024aa7f83bd47a9323d21920d4adabba8071fd2d21230c48460b26cedf392588f8265b9edc133abb1b0d6d0adf4dae0970032900a8c9
   languageName: node
   linkType: hard
 
@@ -4910,7 +4890,7 @@ __metadata:
   dependencies:
     "@apollo/client": "npm:^3.11.0"
     "@jahia/eslint-config": "npm:^2.2.0"
-    "@jahia/moonstone": "file:./vendor/jahia-moonstone-2.17.5.tgz"
+    "@jahia/moonstone": "npm:^2.17.5"
     "@jahia/ui-extender": "npm:^1.2.0"
     "@jahia/vite-federation-plugin": "npm:^0.1.1"
     "@types/prop-types": "npm:^15"
