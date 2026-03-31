@@ -24,9 +24,9 @@ Jahia OSGi module (primarily frontend, with a lightweight Java GraphQL extension
 
 ```bash
 yarn build          # Vite build → src/main/resources/javascript/apps/
-mvn clean install   # Full build → target/augmented-authoring-*.jar
+mvn clean install   # Full build → target/kfind-*.jar
 ./deploy.sh         # Deploy JAR to Jahia (requires .env with JAHIA_URL, JAHIA_USER, JAHIA_PASS)
-node/node node_modules/typescript/bin/tsc --noEmit    # Type-check
+npx tsc --noEmit    # Type-check
 ```
 
 E2E tests are available under `tests/` (Cypress setup).
@@ -74,3 +74,13 @@ src/javascript/
 - ESLint with `@jahia` preset; boolean props use `is*`/`has*` naming
 - No credentials in source code
 - Escape user input when constructing JCR criteria/queries
+
+## AI Skills
+
+Deeper domain guidance lives in on-demand skills. Copilot loads these automatically when relevant — or reference them explicitly:
+
+- `moonstone-ui` — Typography, component catalog, Vite federation config
+- `jahia-frontend` — `window.jahia.apolloClient`, `registry.add()`, CSS modules, `globals.d.ts`
+- `jahia-config` — OSGi `.cfg` → JSP → `contextJsParameters` → accessor functions
+- `jahia-graphql-frontend` — `gql` queries, imperative `client.query()`, `nodesByCriteria`, stale filtering
+- `jahia-graphql-extension` — Java `@GraphQLTypeExtension`, OSGi registration, security
