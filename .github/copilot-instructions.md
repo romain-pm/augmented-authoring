@@ -59,6 +59,7 @@ src/javascript/
 
 ## Conventions
 
+- **Check Jahia first**: Before implementing any utility, resolver, lookup, or data-access logic, verify whether Jahia already provides an equivalent out of the box — existing GraphQL fields, JCR services, OSGi utilities, or Moonstone components. Only build custom logic when no Jahia equivalent exists.
 - **Imports**: Always include `.ts`/`.tsx` extensions (e.g., `import { foo } from "./bar.ts"`)
 - **CSS**: Use CSS Modules — import as `import s from "./Component.module.css"`
 - **Components**: `.tsx` for React components, `.ts` for hooks/utilities/queries
