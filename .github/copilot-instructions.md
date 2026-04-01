@@ -84,3 +84,4 @@ Deeper domain guidance lives in on-demand skills. Copilot loads these automatica
 - `jahia-config` — OSGi `.cfg` → JSP → `contextJsParameters` → accessor functions
 - `jahia-graphql-frontend` — `gql` queries, imperative `client.query()`, `nodesByCriteria`, stale filtering
 - `jahia-graphql-extension` — Java `@GraphQLTypeExtension`, OSGi registration, security
+- `jahia-ui-extensions-build-deploy` — Jahia UI extension build/package/deploy workflow, including recreating `deploy.sh` and provisioning API usage
