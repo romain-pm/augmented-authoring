@@ -1,10 +1,12 @@
 .resultRow {
   height: 96px;
+  padding: 6px;
   cursor: pointer;
 }
 
 .resultRowCompact {
   height: 56px;
+  padding: 6px;
   cursor: pointer;
 }
 
