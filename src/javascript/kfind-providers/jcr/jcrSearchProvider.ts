@@ -48,9 +48,10 @@ export function createJcrSearchProvider(
 ): KFindResultsProvider {
   return withStaleResponseFiltering(async (query, page) => {
     const sitePath = `/sites/${getSiteKey()}`;
-    // Lucene treats hyphens as NOT operators, so replace with spaces for
-    // consistent full-text matching (e.g. "my-term" → "my term").
-    const searchTerm = query.replace(/-/g, " ");
+    // vSearchTerm wraps the query in SQL LIKE wildcards (%term%), which
+    // is what makes hyphenated queries work: the LIKE/contains on %term%
+    // bypasses Lucene's hyphen-as-NOT interpretation.
+    const searchTerm = query;
 
     // Request PAGE_SIZE + 1 to check if there are more items to paginate
     const limit = PAGE_SIZE + 1;

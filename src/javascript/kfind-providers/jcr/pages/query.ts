@@ -22,6 +22,7 @@ export const JCR_NODES_BY_CRITERIA_QUERY = gql`
             any: [
               { contains: $searchTerm }
               { contains: $searchTerm, property: "j:tagList" },
+              # vSearchTerm (%term%) makes hyphenated queries work via LIKE/contains
               { contains: $vSearchTerm},
               { like: $vSearchTerm, property: "j:nodename" }
             ]
