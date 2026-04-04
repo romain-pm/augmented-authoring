@@ -1,6 +1,6 @@
 .header {
   flex-shrink: 0;
-  padding: 16px 16px 12px;
+  padding: var(--spacing-medium) var(--spacing-medium) 12px;
   border-bottom: 1px solid var(--color-accent);
 }
 

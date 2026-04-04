@@ -1,12 +1,12 @@
 .resultRow {
   height: 96px;
-  padding: 8px;
+  padding: var(--spacing-small);
   cursor: pointer;
 }
 
 .resultRowCompact {
   height: 56px;
-  padding: 8px;
+  padding: var(--spacing-small);
   cursor: pointer;
 }
 
@@ -32,15 +32,15 @@
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  margin-right: 8px;
-  border-radius: 4px;
+  margin-right: var(--spacing-small);
+  border-radius: var(--spacing-nano);
   object-fit: cover;
 }
 
 .resultRowInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-nano);
   flex: 1;
   min-width: 0;
 }
@@ -48,7 +48,7 @@
 .resultRowMeta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-small);
 }
 
 .resultRowExcerpt {
@@ -62,7 +62,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-nano);
   visibility: hidden;
 }
 

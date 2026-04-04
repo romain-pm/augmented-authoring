@@ -1,4 +1,4 @@
 .section {
-  margin-top: 8px;
+  margin-top: var(--spacing-small);
   padding-left: 6px;
 }
