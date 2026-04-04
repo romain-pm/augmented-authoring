@@ -1485,9 +1485,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jahia/cypress@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@jahia/cypress@npm:4.5.0"
+"@jahia/cypress@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@jahia/cypress@npm:8.0.0"
   dependencies:
     "@apollo/client": "npm:^3.4.9"
     cypress-real-events: "npm:^1.11.0"
@@ -1498,7 +1498,7 @@ __metadata:
     ci.startup: ./ci.startup.sh
     env.debug: ./env.debug.sh
     env.run: ./env.run.sh
-  checksum: 10c0/c4da9ca43b39dd10503780ac0173499be336d000b6a7e36d30521cf25f74632bc59734d427efeffc4184bf7b53e2dd50fecf597657794cd3f32413748aa10bfa
+  checksum: 10c0/22e8977840657492c3a7dfce54746ded2fccff925a0d03783b12ebd3733148e812a472f892e98dab8b416df471a1e0f95b01f7af054839562f0313e4d1995851
   languageName: node
   linkType: hard
 
@@ -1540,7 +1540,7 @@ __metadata:
     "@cypress/code-coverage": "npm:^3.9.11"
     "@cypress/webpack-preprocessor": "npm:^5.9.1"
     "@istanbuljs/nyc-config-typescript": "npm:^1.0.1"
-    "@jahia/cypress": "npm:4.5.0"
+    "@jahia/cypress": "npm:^8.0.0"
     "@jahia/eslint-config": "npm:^2.1.2"
     "@typescript-eslint/eslint-plugin": "npm:^5.2.0"
     "@typescript-eslint/parser": "npm:^5.2.0"

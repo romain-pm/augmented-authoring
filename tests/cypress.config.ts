@@ -2,7 +2,7 @@ import {defineConfig} from 'cypress';
 
 export default defineConfig({
     chromeWebSecurity: false,
-    defaultCommandTimeout: 10000,
+    defaultCommandTimeout: 2000,
     video: true,
     reporter: 'cypress-multi-reporters',
     reporterOptions: {

@@ -47,24 +47,26 @@ query getNodeByPath($path: String!) {
 type GraphQLResult = {
     data?: {
         jcr?: {
-            addNode?: { uuid?: string } | null;
-            nodeByPath?: { uuid?: string } | null;
+            addNode?: {uuid?: string} | null;
+            nodeByPath?: {uuid?: string} | null;
         } | null;
     } | null;
     errors?: unknown;
 };
 
-const gqlRequest = (body: Record<string, unknown>): Cypress.Chainable<GraphQLResult> =>
-    cy.request({
-        method: 'POST',
-        url: '/modules/graphql',
-        headers: {
-            'Content-Type': 'application/json',
-            'Origin': Cypress.config('baseUrl')
-        },
-        auth: {user: 'root', pass: Cypress.env('SUPER_USER_PASSWORD')},
-        body
-    }).then(response => response.body as GraphQLResult);
+const gqlRequest = (body: Record<string, unknown>): Cypress.Chainable<any> =>
+    cy
+        .request<GraphQLResult>({
+            method: 'POST',
+            url: '/modules/graphql',
+            headers: {
+                'Content-Type': 'application/json',
+                Origin: Cypress.config('baseUrl')
+            },
+            auth: {user: 'root', pass: Cypress.env('SUPER_USER_PASSWORD')},
+            body
+        })
+        .then(response => response.body);
 
 const addNode = (variables: {
     parentPathOrId: string;
@@ -139,8 +141,10 @@ export const openSearchModal = () => {
         cy.get('body').type('{ctrl}k');
     });
 
-    cy.get(panelSelector, {timeout: 15000}).should('be.visible');
-    cy.get('[data-kfind-search-input-wrapper="true"] input[type="search"]', {timeout: 10000}).as('searchInput').should('be.visible');
+    cy.get(panelSelector, {timeout: 2000}).should('be.visible');
+    cy.get('[data-kfind-search-input-wrapper="true"] input[type="search"]', {timeout: 2000})
+        .as('searchInput')
+        .should('be.visible');
 };
 
 export const closeSearchModal = () => {
@@ -251,7 +255,7 @@ const ensureMediaRoot = (siteKey: string) => {
 // so that full-text search can find the file by keyword phrases. Lucene treats
 // hyphens as NOT operators, so search terms with hyphens won't match hyphenated
 // filenames — content with spaces is more reliably indexed.
-const uploadFile = (parentPathOrId: string, name: string): Cypress.Chainable<GraphQLResult> => {
+const uploadFile = (parentPathOrId: string, name: string): Cypress.Chainable<any> => {
     const boundary = `CypressBoundary${Date.now()}`;
     const fileKey = 'filedata';
     const fileContent = name.replace(/-/g, ' ').replace(/\.\w+$/, '');
@@ -273,16 +277,18 @@ const uploadFile = (parentPathOrId: string, name: string): Cypress.Chainable<Gra
         `--${boundary}--`
     ].join('\r\n');
 
-    return cy.request({
-        method: 'POST',
-        url: '/modules/graphql',
-        headers: {
-            'Content-Type': `multipart/form-data; boundary=${boundary}`,
-            'Origin': Cypress.config('baseUrl')
-        },
-        auth: {user: 'root', pass: Cypress.env('SUPER_USER_PASSWORD')},
-        body
-    }).then(response => response.body as GraphQLResult);
+    return cy
+        .request<GraphQLResult>({
+            method: 'POST',
+            url: '/modules/graphql',
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                Origin: Cypress.config('baseUrl')
+            },
+            auth: {user: 'root', pass: Cypress.env('SUPER_USER_PASSWORD')},
+            body
+        })
+        .then(response => response.body);
 };
 
 export const createMediaViaGraphql = (siteKey: string, fileName: string) =>

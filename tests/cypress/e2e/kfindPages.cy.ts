@@ -1,9 +1,4 @@
-import {
-    closeSearchModal,
-    createPageViaGraphql,
-    searchInModal,
-    SITE_KEY
-} from './kfindProviders.helpers';
+import {closeSearchModal, createPageViaGraphql, searchInModal, SITE_KEY} from './kfindProviders.helpers';
 
 describe('kFind pages provider', () => {
     const token = Date.now().toString();
@@ -29,14 +24,14 @@ describe('kFind pages provider', () => {
     it('finds a page created via GraphQL', () => {
         searchInModal(exactTitle);
 
-        cy.get('[data-kfind-panel="true"]').contains('Pages', {timeout: 10000});
-        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 20000});
+        cy.get('[data-kfind-panel="true"]').contains('Pages', {timeout: 2000});
+        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 2000});
     });
 
     it('filters page results by query term', () => {
         searchInModal(`exact ${token}`);
 
-        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 20000});
+        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 2000});
         cy.get('[data-kfind-panel="true"]').should('not.contain', broaderTitle);
     });
 });

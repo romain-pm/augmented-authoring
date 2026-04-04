@@ -1,9 +1,4 @@
-import {
-    closeSearchModal,
-    createMainResourceViaGraphql,
-    searchInModal,
-    SITE_KEY
-} from './kfindProviders.helpers';
+import {closeSearchModal, createMainResourceViaGraphql, searchInModal, SITE_KEY} from './kfindProviders.helpers';
 
 describe('kFind main resources provider', () => {
     const token = Date.now().toString();
@@ -38,31 +33,31 @@ describe('kFind main resources provider', () => {
     it('finds a main resource created via GraphQL', () => {
         searchInModal(exactTitle);
 
-        cy.get('[data-kfind-panel="true"]').contains(/Main Resource/i, {timeout: 10000});
-        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 20000});
+        cy.get('[data-kfind-panel="true"]').contains(/Main Resource/i, {timeout: 2000});
+        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 2000});
     });
 
     it('filters main resource results by query term', () => {
         searchInModal(`exact ${token}`);
 
-        cy.get('[data-kfind-panel="true"]').contains(/Main Resource/i, {timeout: 10000});
-        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 20000});
+        cy.get('[data-kfind-panel="true"]').contains(/Main Resource/i, {timeout: 2000});
+        cy.get('[data-kfind-panel="true"]').contains(exactTitle, {timeout: 2000});
         cy.get('[data-kfind-panel="true"]').should('not.contain', broaderTitle);
     });
 
     it('shows more main resource results after clicking Show more', () => {
         searchInModal(`kfind main resource bulk ${token}`);
 
-        cy.get('[data-kfind-panel="true"]').contains(/Main Resource/i, {timeout: 10000});
-        cy.get('[data-kfind-result-row="true"][tabindex]', {timeout: 20000})
+        cy.get('[data-kfind-panel="true"]').contains(/Main Resource/i, {timeout: 2000});
+        cy.get('[data-kfind-result-row="true"][tabindex]', {timeout: 2000})
             .its('length')
             .then(initialCount => {
                 const countBefore = Number(initialCount);
                 expect(countBefore).to.be.greaterThan(0);
 
-            cy.get('[data-kfind-show-more="true"]', {timeout: 20000}).first().click();
+                cy.get('[data-kfind-show-more="true"]', {timeout: 2000}).first().click();
 
-            cy.get('[data-kfind-result-row="true"][tabindex]', {timeout: 20000})
+                cy.get('[data-kfind-result-row="true"][tabindex]', {timeout: 2000})
                     .its('length')
                     .should('be.greaterThan', countBefore);
             });
