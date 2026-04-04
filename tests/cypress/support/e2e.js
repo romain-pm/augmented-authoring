@@ -3,6 +3,7 @@
 // ***********************************************************
 
 import './commands';
+import 'cypress-real-events/support';
 import addContext from 'mochawesome/addContext';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -32,7 +33,9 @@ Cypress.on('test:after:run', (test, runnable) => {
     const videoUrl = 'videos/' + videoName + '.mp4';
     addContext({test}, videoUrl);
     if (test.state === 'failed') {
-        const screenshot = `screenshots/${Cypress.spec.relative.replace('cypress/e2e/', '')}/${runnable.parent.title} -- ${test.title} (failed).png`;
+        const screenshot = `screenshots/${Cypress.spec.relative.replace('cypress/e2e/', '')}/${
+            runnable.parent.title
+        } -- ${test.title} (failed).png`;
         addContext({test}, screenshot);
     }
 });

@@ -1,11 +1,11 @@
 {
     "extends": "../tsconfig.json",
-    "include": ["**/*/*.ts", "support/e2e.js"],
+    "include": ["**/*.ts", "support/e2e.js"],
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
         "noEmit": false,
         "isolatedModules": false,
-        "types": ["cypress", "node", "@jahia/cypress"],
+        "types": ["cypress", "node", "@jahia/cypress", "cypress-real-events"],
         "lib": ["es2015"]
     }
 }

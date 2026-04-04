@@ -1,13 +1,13 @@
 import {
-    closeSearchModal,
     createPageViaGraphql,
+    createTestToken,
     openSearchModal,
     searchInModal,
     SITE_KEY
 } from './kfindProviders.helpers';
 
 describe('kFind edge cases and shortcuts', () => {
-    const token = Date.now().toString();
+    const token = createTestToken();
     const pageTitle = `kfind edge title ${token}`;
 
     before('Seed content', () => {
@@ -16,13 +16,11 @@ describe('kFind edge cases and shortcuts', () => {
     });
 
     beforeEach(() => {
-        cy.login();
-        cy.visit(`/jahia/jcontent/${SITE_KEY}/en/pages`);
-        cy.get('body', {timeout: 30000}).should('be.visible');
+        cy.visitJContentPage(SITE_KEY);
     });
 
     afterEach(() => {
-        closeSearchModal();
+        cy.closeKfindModalIfOpen();
     });
 
     it('shows global no-results state for an unknown query', () => {

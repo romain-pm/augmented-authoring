@@ -1,7 +1,7 @@
-import {closeSearchModal, createPageViaGraphql, searchInModal, SITE_KEY} from './kfindProviders.helpers';
+import {createPageViaGraphql, createTestToken, searchInModal, SITE_KEY} from './kfindProviders.helpers';
 
 describe('kFind pages provider', () => {
-    const token = Date.now().toString();
+    const token = createTestToken();
     const exactTitle = `kfind pages exact ${token}`;
     const broaderTitle = `kfind pages broader ${token}`;
 
@@ -12,13 +12,11 @@ describe('kFind pages provider', () => {
     });
 
     beforeEach(() => {
-        cy.login();
-        cy.visit(`/jahia/jcontent/${SITE_KEY}/en/pages`);
-        cy.get('body', {timeout: 30000}).should('be.visible');
+        cy.visitJContentPage(SITE_KEY);
     });
 
     afterEach(() => {
-        closeSearchModal();
+        cy.closeKfindModalIfOpen();
     });
 
     it('finds a page created via GraphQL', () => {

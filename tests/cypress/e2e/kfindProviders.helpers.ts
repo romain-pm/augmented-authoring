@@ -84,12 +84,25 @@ const getNodeByPath = (path: string) => gqlRequest({query: GET_NODE_BY_PATH_QUER
 
 export const SITE_KEY = 'kfind-test-site';
 
+const pad2 = (value: number) => value.toString().padStart(2, '0');
+
+export const createTestToken = (date = new Date()) => {
+    const year = date.getFullYear();
+    const day = pad2(date.getDate());
+    const month = pad2(date.getMonth() + 1);
+    const hours = pad2(date.getHours());
+    const minutes = pad2(date.getMinutes());
+
+    return `${year}${day}${month}-${hours}${minutes}`;
+};
+
 // ---------------------------------------------------------------------------
 // Modal interaction helpers
 // ---------------------------------------------------------------------------
 
 export const openSearchModal = () => {
     const panelSelector = '[data-kfind-panel="true"]';
+    const modalSelector = '[data-kfind-modal="true"]';
 
     // Wait for kfind to mount its modal container — once #kfind-search-modal
     // exists, the KFindModal useEffect has run and the kfind:open-search
@@ -141,8 +154,9 @@ export const openSearchModal = () => {
         cy.get('body').type('{ctrl}k');
     });
 
-    cy.get(panelSelector, {timeout: 2000}).should('be.visible');
-    cy.get('[data-kfind-search-input-wrapper="true"] input[type="search"]', {timeout: 2000})
+    cy.get(modalSelector, {timeout: 10000}).should('be.visible');
+    cy.get(panelSelector, {timeout: 10000}).should('be.visible');
+    cy.get('[data-kfind-search-input-wrapper="true"] input[type="search"]', {timeout: 10000})
         .as('searchInput')
         .should('be.visible');
 };

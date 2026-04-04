@@ -34,6 +34,7 @@ export const KFindModal = () => {
   // ── Keyboard shortcut & custom event listeners ──
   // Registered on both the iframe document and the parent document so the
   // shortcut works regardless of which frame has focus.
+  // TODO: Try to clean
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -78,52 +79,52 @@ export const KFindModal = () => {
   }
 
   return (
-      <Modal
+    <Modal
       isOpen={isOpen}
       size="full"
       className={`search-modal ${s.modalWidth}`}
       data-kfind-modal="true"
       onOpenChange={setIsOpen}
-      >
-          <>
-              <div className={s.content}>
-                  <ApolloProvider client={apolloClient}>
-                      <KFindPanel focusOnField onNavigate={() => setIsOpen(false)}/>
-                  </ApolloProvider>
-              </div>
-              <ModalFooter>
-                  <div className={s.footerLayout}>
-                      <div className={s.footerHints}>
-                          <Typography variant="caption">
-                              {t(
+    >
+      <>
+        <div className={s.content}>
+          <ApolloProvider client={apolloClient}>
+            <KFindPanel focusOnField onNavigate={() => setIsOpen(false)} />
+          </ApolloProvider>
+        </div>
+        <ModalFooter>
+          <div className={s.footerLayout}>
+            <div className={s.footerHints}>
+              <Typography variant="caption">
+                {t(
                   "search.modal.hint",
                   "Press Ctrl+K or ⌘K to open · Esc to close · Tab to navigate · Enter to go · E to edit",
                 )}
-                          </Typography>
-                          <Typography variant="caption">
-                              {t(
+              </Typography>
+              <Typography variant="caption">
+                {t(
                   "search.modal.reportIssuePrefix",
                   "Report bugs and improvements at",
                 )}{" "}
-                              <a
+                <a
                   className={s.issueLink}
                   href="https://github.com/Jahia/kfind/issues"
                   target="_blank"
                   rel="noreferrer"
-                              >
-                                  https://github.com/Jahia/kfind/issues
-                              </a>
-                          </Typography>
-                      </div>
-                      {/* Build time shown only in dev builds */}
-                      {import.meta.env.DEV && (
-                      <Typography variant="caption" style={{ opacity: 0.4 }}>
-                          {window.contextJsParameters.kfind?.buildTime ?? ""}
-                      </Typography>
+                >
+                  https://github.com/Jahia/kfind/issues
+                </a>
+              </Typography>
+            </div>
+            {/* Build time shown only in dev builds */}
+            {import.meta.env.DEV && (
+              <Typography variant="caption" style={{ opacity: 0.4 }}>
+                {window.contextJsParameters.kfind?.buildTime ?? ""}
+              </Typography>
             )}
-                  </div>
-              </ModalFooter>
-          </>
-      </Modal>
+          </div>
+        </ModalFooter>
+      </>
+    </Modal>
   );
 };

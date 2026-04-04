@@ -1,7 +1,7 @@
-import {closeSearchModal, createMediaViaGraphql, searchInModal, SITE_KEY} from './kfindProviders.helpers';
+import {createMediaViaGraphql, createTestToken, searchInModal, SITE_KEY} from './kfindProviders.helpers';
 
 describe('kFind media provider', () => {
-    const token = Date.now().toString();
+    const token = createTestToken();
     const exactFile = `kfind-media-exact-${token}.txt`;
     const broaderFile = `kfind-media-broader-${token}.txt`;
 
@@ -12,13 +12,11 @@ describe('kFind media provider', () => {
     });
 
     beforeEach(() => {
-        cy.login();
-        cy.visit(`/jahia/jcontent/${SITE_KEY}/en/pages`);
-        cy.get('body', {timeout: 30000}).should('be.visible');
+        cy.visitJContentPage(SITE_KEY);
     });
 
     afterEach(() => {
-        closeSearchModal();
+        cy.closeKfindModalIfOpen();
     });
 
     it('finds a media node created via GraphQL', () => {

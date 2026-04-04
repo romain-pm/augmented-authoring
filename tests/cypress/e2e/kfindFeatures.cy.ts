@@ -1,14 +1,12 @@
-import {closeSearchModal, searchInModal, SITE_KEY} from './kfindProviders.helpers';
+import {searchInModal, SITE_KEY} from './kfindProviders.helpers';
 
 describe('kFind features provider', () => {
     beforeEach(() => {
-        cy.login();
-        cy.visit(`/jahia/jcontent/${SITE_KEY}/en/pages`);
-        cy.get('body', {timeout: 30000}).should('be.visible');
+        cy.visitJContentPage(SITE_KEY);
     });
 
     afterEach(() => {
-        closeSearchModal();
+        cy.closeKfindModalIfOpen();
     });
 
     it('returns feature results for page models query', () => {
