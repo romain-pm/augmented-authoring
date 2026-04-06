@@ -2,13 +2,12 @@ import {
     createPageViaGraphql,
     createTestToken,
     MEDIUM_TIMEOUT,
+    RESULT_ROW_SELECTOR,
+    SEARCH_INPUT_SELECTOR,
     searchInModal,
     SITE_KEY,
     visitKfindSiteInJContent
 } from './kfindProviders.helpers';
-
-const RESULT_ROW_SELECTOR = '[data-kfind-result-row="true"][tabindex]';
-const SEARCH_INPUT_SELECTOR = '[data-kfind-search-input-wrapper="true"] input[type="search"]';
 
 describe('kFind keyboard interaction', () => {
     const token = createTestToken();

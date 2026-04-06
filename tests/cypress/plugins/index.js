@@ -51,18 +51,20 @@ module.exports = (on, config) => {
             return;
         }
 
-        const sourcePath = rawReports[0].filePath;
+        // Rename ALL matching raw reports (not just the most recent) to avoid
+        // leaving orphans when two specs finish close together.
         const baseName = `cypress_${toSuiteName(spec.relative)}_${runId}`;
-        let targetName = `${baseName}.json`;
-        let index = 1;
+        for (const report of rawReports) {
+            let targetName = `${baseName}.json`;
+            let index = 1;
 
-        // Preserve all runs by suffixing when the same spec is executed multiple times.
-        while (fs.existsSync(path.join(reportDir, targetName))) {
-            targetName = `${baseName}_${String(index).padStart(3, '0')}.json`;
-            index += 1;
+            while (fs.existsSync(path.join(reportDir, targetName))) {
+                targetName = `${baseName}_${String(index).padStart(3, '0')}.json`;
+                index += 1;
+            }
+
+            fs.renameSync(report.filePath, path.join(reportDir, targetName));
         }
-
-        fs.renameSync(sourcePath, path.join(reportDir, targetName));
     });
 
     on('task', {});

@@ -1,8 +1,10 @@
 #!/bin/bash
 if [[ -f .env ]]; then
+  set -a
   source .env
-  export $(cat .env | sed 's/=.*//g'| xargs)
+  set +a
 else
+  set -a
   source .env.example
-  export $(cat .env.example | sed 's/=.*//g'| xargs)
+  set +a
 fi

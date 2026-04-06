@@ -16,6 +16,12 @@ export const SHORT_TIMEOUT = 1000;
 export const MEDIUM_TIMEOUT = 2000;
 export const LONG_TIMEOUT = 10000;
 
+export const RESULT_ROW_SELECTOR = '[data-kfind-result-row="true"][tabindex]';
+export const SHOW_MORE_SELECTOR = '[data-kfind-show-more="true"]';
+export const SEARCH_INPUT_SELECTOR = '[data-kfind-search-input-wrapper="true"] input[type="search"]';
+
+const GQL_AUTH = () => ({user: 'root', pass: Cypress.env('SUPER_USER_PASSWORD')});
+
 const ADD_NODE_MUTATION = `
 mutation addNode($parentPathOrId: String!, $name: String!, $primaryNodeType: String!, $properties: [InputJCRProperty], $mixins: [String]) {
     jcr(workspace: EDIT) {
@@ -91,7 +97,7 @@ const hasPathNotFoundError = (errors: unknown) => {
     });
 };
 
-const gqlRequest = (body: Record<string, unknown>): Cypress.Chainable<any> =>
+const gqlRequest = (body: Record<string, unknown>): Cypress.Chainable<GraphQLResult> =>
     cy
         .request<GraphQLResult>({
             method: 'POST',
@@ -100,7 +106,7 @@ const gqlRequest = (body: Record<string, unknown>): Cypress.Chainable<any> =>
                 'Content-Type': 'application/json',
                 Origin: Cypress.config('baseUrl')
             },
-            auth: {user: 'root', pass: Cypress.env('SUPER_USER_PASSWORD')},
+            auth: GQL_AUTH(),
             body
         })
         .then(response => response.body);
@@ -170,13 +176,13 @@ export const updateKfindConfigurationViaGraphql = (values: Record<string, string
 
 export const SITE_KEY = 'kfind-test-site';
 
-let didEnsureSharedSite = false;
+const ensuredSites = new Set<string>();
 
 export const ensureSiteExists = (siteKey: string = SITE_KEY) =>
     cy.then(() => {
         const sitePath = `/sites/${siteKey}`;
 
-        if (didEnsureSharedSite) {
+        if (ensuredSites.has(siteKey)) {
             return;
         }
 
@@ -187,7 +193,7 @@ export const ensureSiteExists = (siteKey: string = SITE_KEY) =>
 
             if (result?.data?.jcr?.nodeByPath?.uuid) {
                 enableModule('kfind', siteKey);
-                didEnsureSharedSite = true;
+                ensuredSites.add(siteKey);
                 cy.log(`[kfind-setup] Reusing existing site: ${siteKey}`);
                 return;
             }
@@ -197,7 +203,7 @@ export const ensureSiteExists = (siteKey: string = SITE_KEY) =>
             enableModule('kfind', siteKey);
 
             return waitForNodeByPath(sitePath).then(() => {
-                didEnsureSharedSite = true;
+                ensuredSites.add(siteKey);
                 cy.log(`[kfind-setup] Site is ready: ${siteKey}`);
             });
         });
@@ -217,8 +223,9 @@ export const createTestToken = (date = new Date()) => {
     const month = pad2(date.getMonth() + 1);
     const hours = pad2(date.getHours());
     const minutes = pad2(date.getMinutes());
+    const seconds = pad2(date.getSeconds());
 
-    return `${year}${day}${month}-${hours}${minutes}`;
+    return `${year}${day}${month}-${hours}${minutes}${seconds}`;
 };
 
 // ---------------------------------------------------------------------------
@@ -328,25 +335,32 @@ export const createPageViaGraphql = (siteKey: string, pageName: string, pageTitl
 
     return ensureSiteExists(siteKey).then(() =>
         ensureHomePage().then(() =>
-            addNode({
-                parentPathOrId: `/sites/${siteKey}/home`,
-                name: pageName,
-                primaryNodeType: 'jnt:page',
-                properties: [
-                    {
-                        name: 'jcr:title',
-                        language: 'en',
-                        value: pageTitle
-                    },
-                    {
-                        name: 'j:templateName',
-                        value: 'base'
-                    }
-                ]
-            }).then((result: GraphQLResult) => {
-                assertNoGraphQLErrors(result, 'GraphQL errors while creating page');
-                expect(result?.data?.jcr?.addNode?.uuid, 'created page uuid').to.be.a('string');
-                return result;
+            getNodeByPath(`/sites/${siteKey}/home/${pageName}`).then((existing: GraphQLResult) => {
+                if (existing?.data?.jcr?.nodeByPath?.uuid) {
+                    cy.log(`[createPage] Page already exists: ${pageName}`);
+                    return existing;
+                }
+
+                return addNode({
+                    parentPathOrId: `/sites/${siteKey}/home`,
+                    name: pageName,
+                    primaryNodeType: 'jnt:page',
+                    properties: [
+                        {
+                            name: 'jcr:title',
+                            language: 'en',
+                            value: pageTitle
+                        },
+                        {
+                            name: 'j:templateName',
+                            value: 'base'
+                        }
+                    ]
+                }).then((result: GraphQLResult) => {
+                    assertNoGraphQLErrors(result, 'GraphQL errors while creating page');
+                    expect(result?.data?.jcr?.addNode?.uuid, 'created page uuid').to.be.a('string');
+                    return result;
+                });
             })
         )
     );
@@ -393,7 +407,7 @@ const ensureMediaRoot = (siteKey: string) => {
 // so that full-text search can find the file by keyword phrases. Lucene treats
 // hyphens as NOT operators, so search terms with hyphens won't match hyphenated
 // filenames — content with spaces is more reliably indexed.
-const uploadFile = (parentPathOrId: string, name: string): Cypress.Chainable<any> => {
+const uploadFile = (parentPathOrId: string, name: string): Cypress.Chainable<GraphQLResult> => {
     const boundary = `CypressBoundary${Date.now()}`;
     const fileKey = 'filedata';
     const fileContent = name.replace(/-/g, ' ').replace(/\.\w+$/, '');
@@ -423,7 +437,7 @@ const uploadFile = (parentPathOrId: string, name: string): Cypress.Chainable<any
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,
                 Origin: Cypress.config('baseUrl')
             },
-            auth: {user: 'root', pass: Cypress.env('SUPER_USER_PASSWORD')},
+            auth: GQL_AUTH(),
             body
         })
         .then(response => response.body);

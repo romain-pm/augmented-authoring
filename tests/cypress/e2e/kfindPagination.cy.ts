@@ -3,13 +3,12 @@ import {
     createPageViaGraphql,
     createTestToken,
     MEDIUM_TIMEOUT,
+    RESULT_ROW_SELECTOR,
     searchInModal,
+    SHOW_MORE_SELECTOR,
     SITE_KEY,
     visitKfindSiteInJContent
 } from './kfindProviders.helpers';
-
-const RESULT_ROW_SELECTOR = '[data-kfind-result-row="true"][tabindex]';
-const SHOW_MORE_SELECTOR = '[data-kfind-show-more="true"]';
 
 describe('kFind pagination behavior', () => {
     const token = createTestToken();
